@@ -1,0 +1,22 @@
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="300" fill="#f5f3ef"/>
+  <g transform="translate(150, 150)">
+    <!-- Circuit board -->
+    <rect x="-50" y="-40" width="100" height="80" fill="#4caf50" rx="5"/>
+    <!-- Chips -->
+    <rect x="-35" y="-25" width="30" height="20" fill="#333" rx="2"/>
+    <rect x="5" y="-25" width="30" height="20" fill="#333" rx="2"/>
+    <rect x="-35" y="5" width="30" height="20" fill="#333" rx="2"/>
+    <rect x="5" y="5" width="30" height="20" fill="#333" rx="2"/>
+    <!-- Connection points -->
+    <circle cx="-40" cy="-30" r="3" fill="#ffd700"/>
+    <circle cx="40" cy="-30" r="3" fill="#ffd700"/>
+    <circle cx="-40" cy="30" r="3" fill="#ffd700"/>
+    <circle cx="40" cy="30" r="3" fill="#ffd700"/>
+    <!-- LEDs -->
+    <circle cx="-20" cy="35" r="4" fill="#ff4444"/>
+    <circle cx="0" cy="35" r="4" fill="#00ff00"/>
+    <circle cx="20" cy="35" r="4" fill="#0066ff"/>
+  </g>
+  <text x="150" y="260" font-family="Arial, sans-serif" font-size="16" fill="#0066cc" text-anchor="middle" font-weight="bold">READY RUNNING PROJECTS</text>
+</svg>

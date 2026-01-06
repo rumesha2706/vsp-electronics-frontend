@@ -1,0 +1,91 @@
+<div class="admin-subcategories">
+  <div class="header">
+    <div>
+      <button class="back-button" (click)="goBack()">← Back</button>
+      <h1><i class="fas fa-sitemap"></i> Manage Subcategories</h1>
+    </div>
+    <button class="btn btn-primary" (click)="openForm()" *ngIf="!showForm">
+      <i class="fas fa-plus"></i> Add New Subcategory
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <!-- Form -->
+  <div class="form-section" *ngIf="showForm">
+    <div class="form-container">
+      <h2>{{ editingId ? 'Edit' : 'Add New' }} Subcategory</h2>
+      
+      <div class="form-group">
+        <label>Category *</label>
+        <select [(ngModel)]="formData.category_id" required>
+          <option value="0" disabled>Select a category</option>
+          <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Subcategory Name *</label>
+        <input type="text" [(ngModel)]="formData.name" placeholder="Enter subcategory name" />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="formData.description" placeholder="Enter description"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Display Order</label>
+        <input type="number" [(ngModel)]="formData.display_order" />
+      </div>
+
+      <div class="form-group">
+        <label>Subcategory Image</label>
+        <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+        <small>Select an image file to upload</small>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-success" (click)="saveSubcategory()" [disabled]="loading">
+          {{ loading ? 'Saving...' : 'Save Subcategory' }}
+        </button>
+        <button class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subcategories List -->
+  <div class="subcategories-section">
+    <div *ngIf="loading && subcategories.length === 0" class="loading">Loading subcategories...</div>
+    
+    <div class="subcategories-grid" *ngIf="subcategories.length > 0">
+      <div class="subcat-card" *ngFor="let subcat of subcategories">
+        <div class="card-image">
+          <img [src]="subcat.image_url || '/assets/images/placeholder.jpg'" 
+               [alt]="subcat.name"
+               (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
+        </div>
+        <div class="card-content">
+          <h3>{{ subcat.name }}</h3>
+          <p class="category-tag">{{ getCategoryName(subcat.category_id) }}</p>
+          <p class="description">{{ subcat.description }}</p>
+          <p class="meta">Order: {{ subcat.display_order }}</p>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-info" (click)="openForm(subcat)">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-danger" (click)="deleteSubcategory(subcat.id, subcat.category_id)">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-data" *ngIf="!loading && subcategories.length === 0">
+      No subcategories found. <a (click)="openForm()" class="link">Create one now</a>
+    </div>
+  </div>
+</div>

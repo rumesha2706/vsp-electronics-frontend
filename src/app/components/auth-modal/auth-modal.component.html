@@ -1,0 +1,349 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2>{{ activeTab === 'login' ? 'Sign in' : activeTab === 'signup' ? 'Sign up' : 'Reset Password' }}</h2>
+      <button class="close-button" (click)="closeModal()" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Login Required Message -->
+    <div class="alert alert-info" *ngIf="message">
+      <i class="fas fa-info-circle"></i> {{ message }}
+    </div>
+
+    <!-- Error/Success Messages -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+    </div>
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="fas fa-check-circle"></i> {{ successMessage }}
+    </div>
+
+    <!-- Login Form -->
+    <div class="auth-form" *ngIf="activeTab === 'login'">
+      <form (ngSubmit)="onLogin()" #loginForm="ngForm" novalidate>
+        <div class="form-group">
+          <label for="login-email">
+            Username or email address <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="login-email" 
+            name="email"
+            [(ngModel)]="loginData.email"
+            placeholder="example@email.com"
+            autocomplete="email">
+          <small class="field-hint">Email address only (phone numbers not accepted)</small>
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">
+            Password <span class="required">*</span>
+          </label>
+          <div class="password-input">
+            <input 
+              [type]="showPassword ? 'text' : 'password'"
+              id="login-password" 
+              name="password"
+              [(ngModel)]="loginData.password"
+              placeholder="Enter your password"
+              autocomplete="current-password">
+            <button 
+              type="button" 
+              class="toggle-password"
+              (click)="togglePasswordVisibility()"
+              aria-label="Toggle password visibility">
+              <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          LOG IN
+        </button>
+
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox" [(ngModel)]="rememberMe" name="remember">
+            <span>Remember me</span>
+          </label>
+          <a (click)="switchTab('forgot')" class="forgot-password" style="cursor: pointer;">Lost your password?</a>
+        </div>
+
+        <!-- Google Sign In -->
+        <div class="divider">
+          <span>OR</span>
+        </div>
+
+        <div id="google-signin-login" class="google-signin"></div>
+
+        <p class="form-footer">
+          No account yet? 
+          <a (click)="switchTab('signup')" class="link">Create an account</a>
+        </p>
+      </form>
+    </div>
+
+    <!-- Signup Form -->
+    <div class="auth-form" *ngIf="activeTab === 'signup' && emailVerificationStep === 'signup-form'">
+      <form (ngSubmit)="onSignup()" #signupForm="ngForm" novalidate>
+        <div class="form-group">
+          <label for="signup-name">
+            Full Name <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="signup-name" 
+            name="firstName"
+            [(ngModel)]="signupData.firstName"
+            placeholder="Enter your first name"
+            autocomplete="given-name">
+          <small class="field-hint">At least 2 characters, letters only</small>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-email">
+            Email Address <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="signup-email" 
+            name="email"
+            [(ngModel)]="signupData.email"
+            placeholder="example@email.com"
+            autocomplete="email">
+          <small class="field-hint">Valid email only (no phone numbers)</small>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-phone">
+            Phone Number <span class="required">*</span>
+          </label>
+          <input 
+            type="tel" 
+            id="signup-phone" 
+            name="phone"
+            [(ngModel)]="signupData.phone"
+            placeholder="9876543210"
+            maxlength="10"
+            autocomplete="tel">
+          <small class="field-hint">10 digits starting with 6, 7, 8, or 9</small>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-password">
+            Password <span class="required">*</span>
+          </label>
+          <div class="password-input">
+            <input 
+              [type]="showPassword ? 'text' : 'password'"
+              id="signup-password" 
+              name="password"
+              [(ngModel)]="signupData.password"
+              placeholder="Create a strong password"
+              autocomplete="new-password">
+            <button 
+              type="button" 
+              class="toggle-password"
+              (click)="togglePasswordVisibility()"
+              aria-label="Toggle password visibility">
+              <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+          <small class="field-hint">Min 8 characters: uppercase, lowercase, number & special character</small>
+        </div>
+
+        <div class="form-group">
+          <label for="signup-confirm-password">
+            Confirm Password <span class="required">*</span>
+          </label>
+          <input 
+            type="password" 
+            id="signup-confirm-password" 
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            placeholder="Re-enter password"
+            autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          CREATE ACCOUNT
+        </button>
+
+        <!-- Google Sign In -->
+        <div class="divider">
+          <span>OR</span>
+        </div>
+
+        <div id="google-signin-signup" class="google-signin"></div>
+
+        <p class="form-footer">
+          Already have an account? 
+          <a (click)="switchTab('login')" class="link">Sign in here</a>
+        </p>
+      </form>
+    </div>
+
+    <!-- Email Verification Form -->
+    <div class="auth-form" *ngIf="activeTab === 'signup' && emailVerificationStep === 'verify-email'">
+      <div class="verification-header">
+        <h3>📧 Verify Your Email</h3>
+        <p>We've sent a verification code to:</p>
+        <p class="email-display"><strong>{{ pendingSignupData?.email }}</strong></p>
+      </div>
+
+      <form (ngSubmit)="onVerifyEmail()" novalidate>
+        <div class="form-group">
+          <label for="email-code">
+            Verification Code <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="email-code" 
+            name="code"
+            [(ngModel)]="emailVerificationCode"
+            placeholder="000000"
+            maxlength="6"
+            inputmode="numeric"
+            autocomplete="off">
+          <small class="field-hint">Enter the 6-digit code from your email</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          VERIFY EMAIL
+        </button>
+
+        <div class="verification-options">
+          <p class="resend-text">Didn't receive the code?</p>
+          <button type="button" class="btn btn-secondary btn-block" (click)="onResendVerificationEmail()">
+            <i class="fas fa-redo"></i> Resend Code
+          </button>
+          
+          <button type="button" class="btn btn-tertiary btn-block" (click)="onBackToSignupForm()">
+            <i class="fas fa-arrow-left"></i> Back to Signup
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Forgot Password Form -->
+    <div class="auth-form" *ngIf="activeTab === 'forgot'">
+      <!-- Step 1: Enter Email -->
+      <form *ngIf="forgotPasswordStep === 1" (ngSubmit)="onRequestResetCode()" #forgotForm="ngForm" novalidate>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <p>Enter your email address and we'll send you a code to reset your password.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="forgot-email">
+            Email Address <span class="required">*</span>
+          </label>
+          <input 
+            type="email" 
+            id="forgot-email" 
+            name="email"
+            [(ngModel)]="forgotPasswordData.email"
+            placeholder="example@email.com"
+            autocomplete="email">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          SEND RESET CODE
+        </button>
+
+        <p class="form-footer">
+          Remember your password? 
+          <a (click)="switchTab('login')" class="link">Sign in here</a>
+        </p>
+      </form>
+
+      <!-- Step 2: Enter Reset Code -->
+      <form *ngIf="forgotPasswordStep === 2" (ngSubmit)="onVerifyResetCode()" #verifyForm="ngForm" novalidate>
+        <div class="info-box">
+          <i class="fas fa-envelope"></i>
+          <p>We've sent a 6-digit code to <strong>{{forgotPasswordData.email}}</strong></p>
+        </div>
+
+        <div class="form-group">
+          <label for="reset-code">
+            Reset Code <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="reset-code" 
+            name="code"
+            [(ngModel)]="forgotPasswordData.code"
+            placeholder="Enter 6-digit code"
+            maxlength="6"
+            autocomplete="off">
+          <small class="field-hint">Check your email for the reset code</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          VERIFY CODE
+        </button>
+
+        <p class="form-footer">
+          Didn't receive the code? 
+          <a (click)="onRequestResetCode()" class="link" style="cursor: pointer;">Resend</a>
+        </p>
+      </form>
+
+      <!-- Step 3: Reset Password -->
+      <form *ngIf="forgotPasswordStep === 3" (ngSubmit)="onResetPassword()" #resetForm="ngForm" novalidate>
+        <div class="info-box success">
+          <i class="fas fa-check-circle"></i>
+          <p>Code verified! Now create your new password.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="new-password">
+            New Password <span class="required">*</span>
+          </label>
+          <div class="password-input">
+            <input 
+              [type]="showPassword ? 'text' : 'password'"
+              id="new-password" 
+              name="password"
+              [(ngModel)]="forgotPasswordData.newPassword"
+              placeholder="Create a strong password"
+              autocomplete="new-password">
+            <button 
+              type="button" 
+              class="toggle-password"
+              (click)="togglePasswordVisibility()"
+              aria-label="Toggle password visibility">
+              <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+          <small class="field-hint">Min 8 characters: uppercase, lowercase, number & special character</small>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm-new-password">
+            Confirm New Password <span class="required">*</span>
+          </label>
+          <input 
+            type="password" 
+            id="confirm-new-password" 
+            name="confirmPassword"
+            [(ngModel)]="forgotPasswordData.confirmPassword"
+            placeholder="Re-enter new password"
+            autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          RESET PASSWORD
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Floating WhatsApp Button -->
+  <a href="https://wa.me/919876543210" target="_blank" class="whatsapp-float" aria-label="Contact us on WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+</div>

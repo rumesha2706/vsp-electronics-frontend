@@ -1,0 +1,440 @@
+<div class="product-management">
+  <div class="page-header">
+    <div>
+      <button class="btn-back" (click)="goBack()" title="Go back to dashboard">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+      <h1><i class="fas fa-boxes"></i> Product Management</h1>
+      <p>Add, edit, and manage your product catalog</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-secondary" (click)="resetToDefaults()" title="Reset products to default values from code">
+        <i class="fas fa-sync"></i> Reset to Defaults
+      </button>
+      <button class="btn btn-primary" (click)="openAddModal()">
+        <i class="fas fa-plus"></i> Add New Product
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <i class="fas fa-search"></i>
+      <input 
+        type="text" 
+        placeholder="Search by name or ID..." 
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="filterProducts()">
+    </div>
+    
+    <div class="filter-group">
+      <select [(ngModel)]="selectedCategory" (ngModelChange)="filterProducts()">
+        <option value="">All Categories</option>
+        <option *ngFor="let category of categories" [value]="category.slug">
+          {{ category.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <select [(ngModel)]="selectedBrand" (ngModelChange)="filterProducts()">
+        <option value="">All Brands</option>
+        <option value="acebott">ACEBOTT</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <div class="results-info">
+      <span>{{ filteredProducts.length }} products found</span>
+    </div>
+  </div>
+
+  <!-- Products Table -->
+  <div class="products-table">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Brand</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Featured</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of filteredProducts">
+          <td>#{{ product.id }}</td>
+          <td>
+            <img [src]="product.image" [alt]="product.name" class="product-thumb">
+          </td>
+          <td>
+            <strong>{{ product.name }}</strong>
+          </td>
+          <td>{{ product.category }}</td>
+          <td>{{ product.brand }}</td>
+          <td>
+            <span class="price">₹{{ product.price }}</span>
+            <span class="original-price" *ngIf="product.originalPrice">₹{{ product.originalPrice }}</span>
+          </td>
+          <td>
+            <button 
+              class="toggle-btn" 
+              [class.active]="product.inStock"
+              (click)="toggleStock(product)">
+              {{ product.inStock ? 'In Stock' : 'Out of Stock' }}
+            </button>
+          </td>
+          <td>
+            <button 
+              class="toggle-btn" 
+              [class.active]="product.isHot"
+              (click)="toggleHot(product)">
+              {{ product.isHot ? 'Yes' : 'No' }}
+            </button>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon edit" (click)="openEditModal(product)" title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon delete" (click)="deleteProduct(product)" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="no-results" *ngIf="filteredProducts.length === 0">
+      <i class="fas fa-box-open"></i>
+      <p>No products found</p>
+    </div>
+  </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal-overlay" *ngIf="showAddModal" (click)="closeModals()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-plus-circle"></i> Add New Product</h2>
+      <button class="close-btn" (click)="closeModals()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+    </div>
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="fas fa-check-circle"></i> {{ successMessage }}
+    </div>
+
+    <form (ngSubmit)="addProduct()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input type="text" [(ngModel)]="productForm.name" name="name" required>
+        </div>
+
+        <div class="form-group">
+          <label>Brand *</label>
+          <select [(ngModel)]="productForm.brand" name="brand" required>
+            <option value="">Select Brand</option>
+            <option *ngFor="let brand of brands" [value]="brand.name">
+              {{ brand.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category *</label>
+          <select [(ngModel)]="productForm.category" name="category" required (ngModelChange)="productForm.subcategory = ''">
+            <option value="">Select Category</option>
+            <option *ngFor="let category of categories" [value]="category.slug">
+              {{ category.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="getSubcategories().length > 0">
+          <label>Subcategory</label>
+          <select [(ngModel)]="productForm.subcategory" name="subcategory">
+            <option value="">None</option>
+            <option *ngFor="let subcat of getSubcategories()" [value]="subcat.name">
+              {{ subcat.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price (₹) *</label>
+          <input type="number" [(ngModel)]="productForm.price" name="price" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Original Price (₹)</label>
+          <input type="number" [(ngModel)]="productForm.originalPrice" name="originalPrice">
+        </div>
+
+        <div class="form-group">
+          <label>Product Image *</label>
+          
+          <div class="image-mode-toggle">
+            <button 
+              type="button" 
+              class="mode-btn" 
+              [class.active]="imageUploadMode === 'file'"
+              (click)="switchImageMode('file')">
+              <i class="fas fa-upload"></i> Upload File
+            </button>
+            <button 
+              type="button" 
+              class="mode-btn" 
+              [class.active]="imageUploadMode === 'url'"
+              (click)="switchImageMode('url')">
+              <i class="fas fa-link"></i> Image URL
+            </button>
+          </div>
+
+          <div class="image-upload-container" *ngIf="imageUploadMode === 'file'">
+            <input 
+              type="file" 
+              #fileInput1
+              (change)="onImageSelect($event)" 
+              accept="image/*"
+              style="display: none">
+            <button type="button" class="btn-upload" (click)="fileInput1.click()">
+              <i class="fas fa-cloud-upload-alt"></i> Choose Image
+            </button>
+            <span class="file-name" *ngIf="selectedImageFile">{{ selectedImageFile.name }}</span>
+          </div>
+
+          <div class="image-url-container" *ngIf="imageUploadMode === 'url'">
+            <input 
+              type="url" 
+              [(ngModel)]="imageUrlInput" 
+              name="imageUrl"
+              placeholder="https://example.com/image.jpg"
+              class="url-input">
+            <button type="button" class="btn-url" (click)="onImageUrlInput()">
+              <i class="fas fa-download"></i> Use URL
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="image-preview-section" *ngIf="imagePreview">
+        <div class="image-preview">
+          <img [src]="imagePreview" alt="Preview">
+          <button type="button" class="btn-clear" (click)="clearImage()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="image-instructions">
+          <i class="fas fa-check-circle"></i>          <p><strong>Image Ready!</strong> The image will be saved with the product data.</p>          <p class="hint">No manual file copy needed - image is stored automatically!</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="productForm.description" name="description" rows="3" placeholder="Short description for product listing"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>About Product (Detailed)</label>
+        <textarea [(ngModel)]="productForm.aboutProduct" name="aboutProduct" rows="5" placeholder="Detailed product information, features, specifications"></textarea>
+      </div>
+
+      <div class="form-checkboxes">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="productForm.inStock" name="inStock">
+          <span>In Stock</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="productForm.isHot" name="isHot">
+          <span>Featured Product</span>
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> Add Product
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal-overlay" *ngIf="showEditModal" (click)="closeModals()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-edit"></i> Edit Product</h2>
+      <button class="close-btn" (click)="closeModals()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+    </div>
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="fas fa-check-circle"></i> {{ successMessage }}
+    </div>
+
+    <form (ngSubmit)="updateProduct()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input type="text" [(ngModel)]="productForm.name" name="name" required>
+        </div>
+
+        <div class="form-group">
+          <label>Brand *</label>
+          <select [(ngModel)]="productForm.brand" name="brand" required>
+            <option value="">Select Brand</option>
+            <option *ngFor="let brand of brands" [value]="brand.name">
+              {{ brand.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category *</label>
+          <select [(ngModel)]="productForm.category" name="category" required (ngModelChange)="productForm.subcategory = ''">
+            <option value="">Select Category</option>
+            <option *ngFor="let category of categories" [value]="category.slug">
+              {{ category.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="getSubcategories().length > 0">
+          <label>Subcategory</label>
+          <select [(ngModel)]="productForm.subcategory" name="subcategory">
+            <option value="">None</option>
+            <option *ngFor="let subcat of getSubcategories()" [value]="subcat.name">
+              {{ subcat.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price (₹) *</label>
+          <input type="number" [(ngModel)]="productForm.price" name="price" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Original Price (₹)</label>
+          <input type="number" [(ngModel)]="productForm.originalPrice" name="originalPrice">
+        </div>
+
+        <div class="form-group">
+          <label>Product Image *</label>
+          
+          <div class="image-mode-toggle">
+            <button 
+              type="button" 
+              class="mode-btn" 
+              [class.active]="imageUploadMode === 'file'"
+              (click)="switchImageMode('file')">
+              <i class="fas fa-upload"></i> Upload File
+            </button>
+            <button 
+              type="button" 
+              class="mode-btn" 
+              [class.active]="imageUploadMode === 'url'"
+              (click)="switchImageMode('url')">
+              <i class="fas fa-link"></i> Image URL
+            </button>
+          </div>
+
+          <div class="image-upload-container" *ngIf="imageUploadMode === 'file'">
+            <input 
+              type="file" 
+              #fileInput2
+              (change)="onImageSelect($event)" 
+              accept="image/*"
+              style="display: none">
+            <button type="button" class="btn-upload" (click)="fileInput2.click()">
+              <i class="fas fa-cloud-upload-alt"></i> Choose Image
+            </button>
+            <span class="file-name" *ngIf="selectedImageFile">{{ selectedImageFile.name }}</span>
+          </div>
+
+          <div class="image-url-container" *ngIf="imageUploadMode === 'url'">
+            <input 
+              type="url" 
+              [(ngModel)]="imageUrlInput" 
+              name="imageUrl2"
+              placeholder="https://example.com/image.jpg"
+              class="url-input">
+            <button type="button" class="btn-url" (click)="onImageUrlInput()">
+              <i class="fas fa-download"></i> Use URL
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="image-preview-section" *ngIf="imagePreview">
+        <div class="image-preview">
+          <img [src]="imagePreview" alt="Preview">
+          <button type="button" class="btn-clear" (click)="clearImage()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="image-instructions">
+          <i class="fas fa-check-circle"></i>          <p><strong>Image Ready!</strong> The image will be saved with the product data.</p>          <p class="hint">No manual file copy needed - image is stored automatically!</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="productForm.description" name="description" rows="3" placeholder="Short description for product listing"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>About Product (Detailed)</label>
+        <textarea [(ngModel)]="productForm.aboutProduct" name="aboutProduct" rows="5" placeholder="Detailed product information, features, specifications"></textarea>
+      </div>
+
+      <div class="form-checkboxes">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="productForm.inStock" name="inStock">
+          <span>In Stock</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="productForm.isHot" name="isHot">
+          <span>Featured Product</span>
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> Update Product
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+

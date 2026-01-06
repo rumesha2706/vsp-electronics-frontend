@@ -1,0 +1,9 @@
+<a [routerLink]="getRouterLink()" class="subcategory-card">
+  <div class="card-image">
+    <img [src]="imageUrl" [alt]="subcategoryName" (error)="onImageError($event)" />
+  </div>
+  <div class="card-content">
+    <h3>{{ subcategoryName }}</h3>
+    <p class="product-count">{{ productCount }} products</p>
+  </div>
+</a>

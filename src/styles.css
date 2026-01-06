@@ -1,0 +1,743 @@
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:root {
+  /* Color Variables */
+  --primary-brown: #0066cc;
+  --dark-brown: #1D4ED8;
+  --light-brown: #60A5FA;
+  --bg-cream: #f5f3ef; 
+  --bg-light: #fafafa;
+  --text-dark: #333;
+  --text-gray: #666;
+  --text-light: #999;
+  --border-light: #e0d9cf;
+  --blue-link: #0066cc;
+  --red-accent: #ff4444;
+  --green-success: #4caf50;
+  --orange-warning: #ff9800;
+  
+  /* Spacing System */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 40px;
+  --spacing-4xl: 48px;
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* Responsive Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* Blue theme override (apply by adding data-theme="blue" to body) */
+body[data-theme="blue"] {
+  /* Trending blue palette (Tailwind-like) */
+  --primary-brown: #2563EB; /* primary blue */
+  --dark-brown: #1D4ED8; /* darker shade for borders/hover */
+  --light-brown: #60A5FA; /* lighter accent */
+  --bg-cream: #eef6ff;
+  --bg-light: #f6fbff;
+  --text-dark: #0b2342;
+  --text-gray: #475569;
+  --text-light: #94a3b8;
+  --border-light: #dbeafe;
+  --blue-link: #1e40af;
+}
+
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-dark);
+  background-color: white;
+  overflow-x: hidden;
+  cursor: auto;
+}
+
+/* Typography helpers */
+:root {
+  --h1-size: 48px;
+  --h2-size: 32px;
+  --h3-size: 24px;
+  --h4-size: 20px;
+  --lead-size: 18px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+h1 { 
+  font-size: var(--h1-size);
+  font-weight: 700;
+}
+
+h2 { 
+  font-size: var(--h2-size);
+  font-weight: 700;
+}
+
+h3 { 
+  font-size: var(--h3-size);
+  font-weight: 600;
+}
+
+h4 {
+  font-size: var(--h4-size);
+  font-weight: 600;
+}
+
+p {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Button sizing */
+.btn-lg { 
+  padding: 14px 22px; 
+  font-size: 16px; 
+  border-radius: var(--radius-lg); 
+}
+
+.btn-primary { 
+  border-radius: var(--radius-lg); 
+  background: var(--primary-brown); 
+  color: white; 
+  box-shadow: var(--shadow-lg); 
+  transition: transform 0.15s ease, box-shadow 0.15s ease; 
+}
+
+.btn-primary:hover { 
+  transform: translateY(-2px); 
+  box-shadow: var(--shadow-xl); 
+}
+
+.btn-primary:active { 
+  transform: translateY(0); 
+}
+
+.btn-secondary { 
+  border-radius: var(--radius-lg); 
+  background: #f0f0f0; 
+  color: #333; 
+}
+
+/* Utility spacing */
+.section-padding { padding: var(--spacing-3xl) 0; }
+
+/* CURSOR UTILITIES - Standard Cursor Management */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+body {
+  cursor: default;
+}
+
+/* Text selection should be allowed */
+p, span, h1, h2, h3, h4, h5, h6, li, a, label, textarea, input[type="text"], input[type="email"], input[type="search"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Cursor States */
+button:not(:disabled),
+a,
+.clickable,
+[role="button"],
+[role="link"] {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled,
+.disabled {
+  cursor: not-allowed;
+}
+
+/* Form Elements */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+textarea,
+select {
+  cursor: text;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+
+/* Interactive Elements */
+.interactive,
+.hoverable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.interactive:hover,
+.hoverable:hover {
+  opacity: 0.9;
+}
+
+/* Grab Cursor for draggable */
+.draggable,
+[draggable="true"] {
+  cursor: grab;
+}
+
+.draggable:active,
+[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Wait Cursor for loading states */
+.loading,
+.processing {
+  cursor: wait;
+}
+
+/* Help Cursor for info elements */
+.help,
+[title]:not([title=""]) {
+  cursor: help;
+}
+
+/* No drop cursor */
+.no-drop {
+  cursor: no-drop;
+}
+
+/* Not-allowed cursor */
+.not-allowed {
+  cursor: not-allowed;
+}
+
+/* Image cursor */
+img {
+  cursor: default;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+img.interactive {
+  cursor: pointer;
+}
+
+/* Smooth cursor transitions */
+* {
+  transition: cursor 0.15s ease;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: var(--primary-brown);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+/* Responsive Container Padding */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+}
+
+.btn {
+  padding: 12px 30px;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: var(--primary-brown);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--dark-brown);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: var(--text-dark);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: var(--text-gray);
+  transform: translateY(-2px);
+}
+
+.section-title {
+  font-size: var(--h2-size);
+  font-weight: 700;
+  margin-bottom: var(--spacing-2xl);
+  text-align: center;
+  color: var(--text-dark);
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--primary-brown);
+  margin: var(--spacing-lg) auto 0;
+}
+
+/* Grid Layouts with Responsive Breakpoints */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-3xl);
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-3xl);
+}
+
+/* Mobile Responsive Grid */
+@media (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--spacing-lg);
+  }
+  
+  .category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--spacing-md);
+  }
+  
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+  
+  :root {
+    --h1-size: 32px;
+    --h2-size: 24px;
+    --h3-size: 18px;
+    --h4-size: 16px;
+    --lead-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  .category-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+  
+  :root {
+    --h1-size: 24px;
+    --h2-size: 20px;
+    --h3-size: 16px;
+    --h4-size: 14px;
+    --lead-size: 13px;
+  }
+}
+
+/* Loading Spinner */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary-brown);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Floating WhatsApp Button */
+.whatsapp-float {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  bottom: 40px;
+  right: 40px;
+  background-color: #25d366;
+  color: #FFF;
+  border-radius: var(--radius-full);
+  text-align: center;
+  font-size: 30px;
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.whatsapp-float:hover {
+  background-color: #128c7e;
+  box-shadow: var(--shadow-xl);
+  transform: scale(1.1);
+}
+
+.whatsapp-float i {
+  margin: 0;
+}
+
+/* Responsive WhatsApp Button */
+@media (max-width: 768px) {
+  .whatsapp-float {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+    font-size: 24px;
+  }
+}
+
+/* Utility Classes */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gap-1 { gap: var(--spacing-xs); }
+.gap-2 { gap: var(--spacing-sm); }
+.gap-3 { gap: var(--spacing-md); }
+.gap-4 { gap: var(--spacing-lg); }
+.gap-6 { gap: var(--spacing-xl); }
+.gap-8 { gap: var(--spacing-2xl); }
+
+.mx-auto { margin-left: auto; margin-right: auto; }
+.my-auto { margin-top: auto; margin-bottom: auto; }
+
+/* Text Utilities */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+
+/* Responsive Text Utilities */
+@media (max-width: 768px) {
+  .hidden-mobile {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .hidden-desktop {
+    display: none;
+  }
+}
+
+/* ========================================
+   MODERN CURSOR STYLING
+   ======================================== */
+
+/* Default Cursor */
+body, button, input, select, textarea {
+  cursor: auto;
+}
+
+/* Pointer Cursor for Interactive Elements */
+a, 
+button:not(:disabled),
+input[type="button"],
+input[type="submit"],
+input[type="checkbox"],
+input[type="radio"],
+select,
+[role="button"],
+.clickable,
+.btn,
+.thumbnail {
+  cursor: pointer;
+}
+
+/* Text Cursor for Input Fields */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+textarea {
+  cursor: text;
+}
+
+/* Grab Cursor for Draggable Elements */
+.grabable,
+.draggable,
+[draggable="true"] {
+  cursor: grab;
+}
+
+[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Product Image 360 View */
+.main-image-container {
+  cursor: grab;
+}
+
+.main-image-container:active {
+  cursor: grabbing;
+}
+
+/* Disabled Elements */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Loading Cursor */
+.loading,
+.is-loading {
+  cursor: progress;
+}
+
+/* Not-Allowed Cursor */
+.no-drop,
+[data-no-drop="true"] {
+  cursor: no-drop;
+}
+
+/* Help Cursor for Tooltips */
+[title],
+.help,
+.tooltip {
+  cursor: help;
+}
+
+/* Move Cursor */
+.movable,
+.dragging {
+  cursor: move;
+}
+
+/* Resize Cursor */
+.resizable {
+  cursor: resize;
+}
+
+/* Column Resize */
+[role="separator"] {
+  cursor: col-resize;
+}
+
+/* Zoom Cursors */
+.zoom-in {
+  cursor: zoom-in;
+}
+
+.zoom-out {
+  cursor: zoom-out;
+}
+
+/* Link Styling with Pointer */
+a {
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--blue-link);
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--dark-brown);
+}
+
+/* Form Elements */
+.form-control:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  cursor: text;
+}
+
+/* Navigation Links */
+nav a,
+.nav-link {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+nav a:hover,
+.nav-link:hover {
+  cursor: pointer;
+}
+
+/* Product Cards */
+.product-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  cursor: pointer;
+}
+
+/* Modal and Overlay */
+.modal-backdrop,
+.overlay {
+  cursor: auto;
+}
+
+/* Close Buttons */
+.close,
+.btn-close,
+[data-dismiss="modal"] {
+  cursor: pointer;
+}
+
+/* Tab Navigation */
+.nav-tabs .nav-link {
+  cursor: pointer;
+}
+
+/* Dropdown Items */
+.dropdown-menu .dropdown-item {
+  cursor: pointer;
+}
+
+.dropdown-menu .dropdown-item:hover {
+  cursor: pointer;
+}
+
+/* Carousel Controls */
+.carousel-control-prev,
+.carousel-control-next {
+  cursor: pointer;
+}
+
+/* Badge and Label Clickables */
+.badge.badge-clickable {
+  cursor: pointer;
+}
+
+/* List Items */
+.list-item.clickable {
+  cursor: pointer;
+}
+
+/* Smooth Cursor Transitions */
+* {
+  transition: cursor 0.2s ease;
+}

@@ -1,0 +1,131 @@
+<header class="header">
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-content">
+        <div class="working-hours">
+          Working Hours <span class="hours-highlight">10AM - 7PM Monday - Saturday</span>
+        </div>
+        <div class="user-actions">
+          <i class="fas fa-user"></i>
+          <a (click)="openAuthModal()" *ngIf="!isLoggedIn" style="cursor: pointer;">Login / Register</a>
+  
+          <!-- Theme toggle button (Blue theme) -->
+          <button class="theme-toggle-btn" (click)="toggleTheme()" [class.active]="currentTheme === 'blue'">
+            <i class="fas fa-palette"></i>
+            Blue
+          </button>
+          <button class="theme-reset-btn" *ngIf="currentTheme !== 'default'" (click)="resetTheme()" title="Reset theme to default">Reset</button>
+  
+          <div class="user-dropdown-container" *ngIf="isLoggedIn && currentUser">
+            <a (click)="toggleUserDropdown()" class="user-name" style="cursor: pointer;">
+              Hi, {{ (currentUser.firstName || currentUser.name || '').split(' ')[0] }}
+              <i class="fas fa-chevron-down" [class.rotate]="showUserDropdown"></i>
+            </a>
+            <div class="user-dropdown" *ngIf="showUserDropdown">
+              <ul>
+                <li *ngIf="authService.isAdmin()">
+                  <a routerLink="/admin" (click)="showUserDropdown = false" class="admin-link">
+                    <i class="fas fa-shield-alt"></i>
+                    Admin Dashboard
+                  </a>
+                </li>
+                <li *ngIf="authService.isAdmin()" class="divider"></li>
+                <li>
+                  <a routerLink="/my-account" (click)="showUserDropdown = false">
+                    <i class="fas fa-user-circle"></i>
+                    My Account
+                  </a>
+                </li>
+                <li>
+                  <a routerLink="/wishlist" (click)="showUserDropdown = false">
+                    <i class="fas fa-heart"></i>
+                    Wishlist
+                  </a>
+                </li>
+                <li>
+                  <a routerLink="/cart" (click)="showUserDropdown = false">
+                    <i class="fas fa-shopping-cart"></i>
+                    Cart
+                  </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                  <a (click)="onLogout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <app-auth-modal *ngIf="showAuthModal" [message]="authModalMessage" [initialTab]="authModalTab" (close)="closeAuthModal()"></app-auth-modal>
+
+  <!-- Main Header with Logo -->
+  <div class="main-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <a routerLink="/">
+            <h1>VSP <span>ELECTRONICS</span></h1>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="main-nav">
+    <div class="container">
+      <div class="nav-wrapper">
+        <div class="nav-left">
+          <a routerLink="/all-categories" class="categories-btn">
+            <i class="fas fa-th"></i> Product Categories |
+          </a>
+          <ul class="nav-menu">
+            <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeQuoteSidebar()">Home</a></li>
+            <li><a routerLink="/about-us" routerLinkActive="active" (click)="closeQuoteSidebar()">About Us</a></li>
+            <li><a routerLink="/contact-us" routerLinkActive="active" (click)="closeQuoteSidebar()">Contact Us</a></li>
+          </ul>
+        </div>
+        
+        <div class="nav-right">
+          <div class="search-bar">
+            <input type="text" placeholder="Search for products">
+            <button class="search-btn">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+          
+          <div class="header-icons">
+            <a routerLink="/wishlist" class="icon-btn">
+              <i class="fas fa-heart"></i>
+              <span class="badge" *ngIf="wishlistService.getWishlistCount() > 0">{{ wishlistService.getWishlistCount() }}</span>
+            </a>
+            
+            <a routerLink="/quote" class="icon-btn">
+              <i class="fas fa-file-invoice"></i>
+              <span class="badge" *ngIf="quoteService.quoteCount() > 0">{{ quoteService.quoteCount() }}</span>
+            </a>
+            
+            <a routerLink="/compare" class="icon-btn">
+              <i class="fas fa-exchange-alt"></i>
+              <span class="badge" *ngIf="compareCount > 0">{{ compareCount }}</span>
+            </a>
+            
+            <a routerLink="/cart" class="icon-btn cart-icon">
+              <i class="fas fa-shopping-cart"></i>
+              <span class="badge" *ngIf="cartService.cartCount() > 0">{{ cartService.cartCount() }}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>

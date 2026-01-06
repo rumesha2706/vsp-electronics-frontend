@@ -1,0 +1,89 @@
+<div class="admin-categories">
+  <div class="header">
+    <div>
+      <button class="back-button" (click)="goBack()">← Back</button>
+      <h1><i class="fas fa-folder"></i> Manage Categories</h1>
+    </div>
+    <button class="btn btn-primary" (click)="openForm()" *ngIf="!showForm">
+      <i class="fas fa-plus"></i> Add New Category
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <!-- Form -->
+  <div class="form-section" *ngIf="showForm">
+    <div class="form-container">
+      <h2>{{ editingId ? 'Edit' : 'Add New' }} Category</h2>
+      
+      <div class="form-group">
+        <label>Category Name *</label>
+        <input type="text" [(ngModel)]="formData.name" placeholder="Enter category name" />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="formData.description" placeholder="Enter description"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Display Order</label>
+        <input type="number" [(ngModel)]="formData.display_order" />
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" [(ngModel)]="formData.display_on_home" />
+          Display on Home Page
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Category Image</label>
+        <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+        <small>Select an image file to upload</small>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-success" (click)="saveCategory()" [disabled]="loading">
+          {{ loading ? 'Saving...' : 'Save Category' }}
+        </button>
+        <button class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories List -->
+  <div class="categories-section">
+    <div *ngIf="loading && categories.length === 0" class="loading">Loading categories...</div>
+    
+    <div class="categories-grid" *ngIf="categories.length > 0">
+      <div class="category-card" *ngFor="let category of categories">
+        <div class="card-image">
+          <img [src]="category.image_url || '/assets/images/placeholder.jpg'" 
+               [alt]="category.name"
+               (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
+        </div>
+        <div class="card-content">
+          <h3>{{ category.name }}</h3>
+          <p class="description">{{ category.description }}</p>
+          <p class="meta">Order: {{ category.display_order }} | Home: {{ category.display_on_home ? 'Yes' : 'No' }}</p>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-info" (click)="openForm(category)">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-danger" (click)="deleteCategory(category.id)">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-data" *ngIf="!loading && categories.length === 0">
+      No categories found. <a (click)="openForm()" class="link">Create one now</a>
+    </div>
+  </div>
+</div>

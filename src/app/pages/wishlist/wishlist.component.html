@@ -1,0 +1,21 @@
+<div class="wishlist-page">
+  <div class="container">
+    <h1 class="page-title">My Wishlist</h1>
+
+    <div class="wishlist-content" *ngIf="wishlistService.getWishlistItems().length > 0">
+      <div class="product-grid">
+        <app-product-card 
+          *ngFor="let product of wishlistService.getWishlistItems()" 
+          [product]="product">
+        </app-product-card>
+      </div>
+    </div>
+
+    <div class="empty-wishlist" *ngIf="wishlistService.getWishlistItems().length === 0">
+      <i class="fas fa-heart"></i>
+      <h2>Your wishlist is empty</h2>
+      <p>Save items you love to your wishlist!</p>
+      <a routerLink="/shop" class="btn btn-primary">Start Shopping</a>
+    </div>
+  </div>
+</div>

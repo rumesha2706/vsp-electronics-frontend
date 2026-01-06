@@ -1,0 +1,137 @@
+<div class="phone-verification-overlay">
+  <div class="phone-verification-modal">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2>Verify Your Phone Number</h2>
+      <p class="subtitle">Complete your profile setup</p>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-content">
+      <!-- Step 1: Request OTP -->
+      <div *ngIf="step === 'request'" class="verification-step">
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <p>We'll send you a 6-digit code via SMS or WhatsApp to verify your phone number.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="phone-number">
+            Phone Number <span class="required">*</span>
+          </label>
+          <input
+            type="tel"
+            id="phone-number"
+            [(ngModel)]="phoneNumber"
+            placeholder="+91 98765 43210"
+            class="phone-input"
+            [disabled]="loading">
+          <small class="field-hint">Format: +91XXXXXXXXXX or 10 digits</small>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-primary btn-block"
+            (click)="requestOTP()"
+            [disabled]="loading || !phoneNumber.trim()">
+            <span *ngIf="!loading">
+              <i class="fas fa-paper-plane"></i>
+              Send OTP
+            </span>
+            <span *ngIf="loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              Sending...
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-link"
+            (click)="skipVerification()"
+            [disabled]="loading">
+            Skip for Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Verify OTP -->
+      <div *ngIf="step === 'verify'" class="verification-step">
+        <div class="info-box success">
+          <i class="fas fa-check-circle"></i>
+          <p>We sent a code to {{ maskedPhone }}. Check your SMS/WhatsApp inbox.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="otp">
+            Enter 6-Digit Code <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="otp"
+            [(ngModel)]="otp"
+            placeholder="000000"
+            class="otp-input"
+            maxlength="6"
+            inputmode="numeric"
+            [disabled]="loading"
+            (keyup.enter)="verifyOTP()">
+          <small class="field-hint">Only numbers (0-9)</small>
+        </div>
+
+        <div class="timer-section">
+          <p class="timer-text">
+            <i class="fas fa-hourglass-half"></i>
+            Expires in: <span class="timer-value">{{ getFormattedTime() }}</span>
+          </p>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-primary btn-block"
+            (click)="verifyOTP()"
+            [disabled]="loading || otp.length !== 6">
+            <span *ngIf="!loading">
+              <i class="fas fa-check"></i>
+              Verify
+            </span>
+            <span *ngIf="loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              Verifying...
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-secondary btn-block"
+            (click)="resendOTP()"
+            [disabled]="!canResend || loading || resendCount >= maxResends">
+            <i class="fas fa-redo"></i>
+            Resend Code
+            <span *ngIf="resendCount > 0" class="resend-count">({{ resendCount }}/{{ maxResends }})</span>
+          </button>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-link"
+          (click)="skipVerification()"
+          [disabled]="loading">
+          Skip for Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success">
+      <i class="fas fa-check-circle"></i>
+      <span>{{ successMessage }}</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,557 @@
+<div class="user-profile-container">
+  <!-- Sidebar -->
+  <div class="profile-sidebar">
+    <div class="user-avatar">
+      <div class="avatar-placeholder">
+        <i class="fas fa-user"></i>
+      </div>
+    </div>
+
+    <div class="user-info">
+      <h2 class="user-name">{{ currentUser?.name }}</h2>
+      <p class="user-email">{{ currentUser?.email }}</p>
+      <p class="user-role" [class.admin]="currentUser?.role === 'admin'">
+        <i class="fas" [class.fa-crown]="currentUser?.role === 'admin'" [class.fa-user-circle]="currentUser?.role !== 'admin'"></i>
+        {{ currentUser?.role === 'admin' ? 'Administrator' : 'Regular User' }}
+      </p>
+    </div>
+
+    <div class="account-stats">
+      <div class="stat">
+        <span class="stat-label">Member Since</span>
+        <span class="stat-value">{{ accountCreatedDate }}</span>
+      </div>
+    </div>
+
+    <div class="sidebar-menu">
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'profile'"
+        (click)="switchTab('profile')">
+        <i class="fas fa-user-cog"></i>
+        Profile Settings
+      </button>
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'security'"
+        (click)="switchTab('security')">
+        <i class="fas fa-lock"></i>
+        Security
+      </button>
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'notifications'"
+        (click)="switchTab('notifications')">
+        <i class="fas fa-bell"></i>
+        Notifications
+      </button>
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'orders'"
+        (click)="switchTab('orders')">
+        <i class="fas fa-shopping-bag"></i>
+        Order History
+      </button>
+      <button class="menu-item" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="profile-content">
+    <!-- Profile Tab -->
+    <div *ngIf="activeTab === 'profile'" class="tab-content">
+      <div class="content-header">
+        <h2>Profile Information</h2>
+        <p>View and manage your account details</p>
+      </div>
+
+      <!-- View Mode -->
+      <div *ngIf="editMode === 'view'" class="profile-section">
+        <div class="section-header">
+          <h3>Personal Information</h3>
+          <button class="btn btn-sm btn-primary" (click)="startEditProfile()">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Full Name</span>
+            <span class="info-value">{{ currentUser?.name }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Email Address</span>
+            <div class="info-value-with-status">
+              <span class="info-value">{{ currentUser?.email }}</span>
+              <span class="status-badge" [class.verified]="getEmailVerificationStatus().includes('✓')">
+                {{ getEmailVerificationStatus() }}
+              </span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Phone Number</span>
+            <div class="info-value-with-status">
+              <span class="info-value">{{ currentUser?.phone }}</span>
+              <span class="status-badge" [class.verified]="getPhoneVerificationStatus().includes('✓')">
+                {{ getPhoneVerificationStatus() }}
+              </span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Account Role</span>
+            <span class="info-value">
+              <i class="fas" [class.fa-crown]="currentUser?.role === 'admin'" [class.fa-user-circle]="currentUser?.role !== 'admin'"></i>
+              {{ currentUser?.role === 'admin' ? 'Administrator' : 'Regular User' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <button class="quick-action-btn" (click)="startChangeEmail()">
+            <i class="fas fa-envelope"></i>
+            Change Email
+          </button>
+          <button class="quick-action-btn" (click)="startChangePhone()">
+            <i class="fas fa-phone"></i>
+            Change Phone
+          </button>
+        </div>
+      </div>
+
+      <!-- Edit Profile Mode -->
+      <div *ngIf="editMode === 'edit-profile'" class="profile-form">
+        <form (ngSubmit)="saveProfileChanges()">
+          <div class="form-group">
+            <label for="name">Full Name <span class="required">*</span></label>
+            <input
+              type="text"
+              id="name"
+              [(ngModel)]="editFormData.name"
+              name="name"
+              placeholder="Enter your full name"
+              [disabled]="loading">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address <span class="required">*</span></label>
+            <input
+              type="email"
+              id="email"
+              [(ngModel)]="editFormData.email"
+              name="email"
+              placeholder="Enter your email"
+              [disabled]="loading">
+            <small class="field-hint">To change email, use the 'Change Email' button for verification</small>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number <span class="required">*</span></label>
+            <input
+              type="tel"
+              id="phone"
+              [(ngModel)]="editFormData.phone"
+              name="phone"
+              placeholder="+91 98765 43210"
+              [disabled]="loading">
+            <small class="field-hint">To change phone, use the 'Change Phone' button for verification</small>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
+              <span *ngIf="!loading"><i class="fas fa-save"></i> Save Changes</span>
+              <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="loading">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Change Email Mode -->
+      <div *ngIf="editMode === 'edit-email'" class="profile-form">
+        <h3>Change Email Address</h3>
+        <p class="section-desc">A verification email will be sent to your new email address</p>
+
+        <div class="info-box info-alert">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <strong>Current Email:</strong> {{ currentUser?.email }}
+          </div>
+        </div>
+
+        <form (ngSubmit)="requestEmailChange()">
+          <div class="form-group">
+            <label for="new-email">New Email Address <span class="required">*</span></label>
+            <input
+              type="email"
+              id="new-email"
+              [(ngModel)]="pendingNewEmail"
+              name="newEmail"
+              placeholder="Enter new email address"
+              [disabled]="loading">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
+              <span *ngIf="!loading"><i class="fas fa-paper-plane"></i> Send Verification</span>
+              <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="loading">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Change Phone Mode -->
+      <div *ngIf="editMode === 'edit-phone'" class="profile-form">
+        <h3>Change Phone Number</h3>
+        <p class="section-desc">Enter your new phone number and verify via OTP</p>
+
+        <div class="info-box info-alert">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <strong>Current Phone:</strong> {{ currentUser?.phone }}
+          </div>
+        </div>
+
+        <form (ngSubmit)="requestPhoneChange()">
+          <div class="form-group">
+            <label for="new-phone">New Phone Number <span class="required">*</span></label>
+            <input
+              type="tel"
+              id="new-phone"
+              [(ngModel)]="pendingPhoneNumber"
+              name="newPhone"
+              placeholder="+91 98765 43210"
+              [disabled]="loading">
+            <small class="field-hint">Format: +91XXXXXXXXXX or 10 digits</small>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="loading || !pendingPhoneNumber">
+              <span *ngIf="!loading"><i class="fas fa-phone"></i> Verify Phone</span>
+              <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> Processing...</span>
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="loading">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Security Tab -->
+    <div *ngIf="activeTab === 'security'" class="tab-content">
+      <div class="content-header">
+        <h2>Security Settings</h2>
+        <p>Manage your password and security options</p>
+      </div>
+
+      <!-- View Mode -->
+      <div *ngIf="editMode === 'view'" class="security-section">
+        <div class="section-card">
+          <div class="section-header">
+            <h3>Password</h3>
+            <button class="btn btn-sm btn-primary" (click)="startChangePassword()">
+              <i class="fas fa-key"></i> Change Password
+            </button>
+          </div>
+          <p class="section-desc">Keep your account secure with a strong password</p>
+          <div class="info-item">
+            <span class="info-label">Last Changed</span>
+            <span class="info-value">{{ lastPasswordChange || 'Never changed' }}</span>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <h3>Two-Factor Authentication</h3>
+            <span class="badge-coming">Coming Soon</span>
+          </div>
+          <p class="section-desc">Add an extra layer of security to your account</p>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <h3>Active Sessions</h3>
+          </div>
+          <p class="section-desc">Manage your active login sessions</p>
+          <div class="active-session">
+            <div class="session-info">
+              <i class="fas fa-laptop"></i>
+              <div>
+                <p class="session-device">This Device</p>
+                <p class="session-location">Current Session</p>
+              </div>
+            </div>
+            <span class="session-badge">Active Now</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Password Mode -->
+      <div *ngIf="editMode === 'change-password'" class="profile-form">
+        <h3>Change Password</h3>
+        <p class="section-desc">Enter your current password and choose a new one</p>
+
+        <form (ngSubmit)="changePassword()">
+          <div class="form-group">
+            <label for="current-password">Current Password <span class="required">*</span></label>
+            <div class="password-input-group">
+              <input
+                [type]="showPassword.current ? 'text' : 'password'"
+                id="current-password"
+                [(ngModel)]="changePasswordData.currentPassword"
+                name="currentPassword"
+                placeholder="Enter current password"
+                [disabled]="loading">
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="togglePasswordVisibility('current')">
+                <i [class]="showPassword.current ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="new-password">New Password <span class="required">*</span></label>
+            <div class="password-input-group">
+              <input
+                [type]="showPassword.new ? 'text' : 'password'"
+                id="new-password"
+                [(ngModel)]="changePasswordData.newPassword"
+                name="newPassword"
+                placeholder="Enter new password"
+                [disabled]="loading">
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="togglePasswordVisibility('new')">
+                <i [class]="showPassword.new ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <small class="field-hint">Min 8 characters: uppercase, lowercase, number & special character</small>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm-password">Confirm Password <span class="required">*</span></label>
+            <div class="password-input-group">
+              <input
+                [type]="showPassword.confirm ? 'text' : 'password'"
+                id="confirm-password"
+                [(ngModel)]="changePasswordData.confirmPassword"
+                name="confirmPassword"
+                placeholder="Re-enter new password"
+                [disabled]="loading">
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="togglePasswordVisibility('confirm')">
+                <i [class]="showPassword.confirm ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
+              <span *ngIf="!loading"><i class="fas fa-lock"></i> Update Password</span>
+              <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> Updating...</span>
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="loading">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Notifications Tab -->
+    <div *ngIf="activeTab === 'notifications'" class="tab-content">
+      <div class="content-header">
+        <h2>Notification Preferences</h2>
+        <p>Manage how you receive updates</p>
+      </div>
+
+      <div class="notifications-section">
+        <div class="notification-item">
+          <div class="notification-info">
+            <h4>Order Updates</h4>
+            <p>Receive notifications about order status changes</p>
+          </div>
+          <input type="checkbox" class="toggle-switch" checked>
+        </div>
+
+        <div class="notification-item">
+          <div class="notification-info">
+            <h4>Promotions & Offers</h4>
+            <p>Get notified about special deals and discounts</p>
+          </div>
+          <input type="checkbox" class="toggle-switch" checked>
+        </div>
+
+        <div class="notification-item">
+          <div class="notification-info">
+            <h4>Account Security</h4>
+            <p>Alerts about login attempts and security changes</p>
+          </div>
+          <input type="checkbox" class="toggle-switch" checked>
+        </div>
+
+        <div class="notification-item">
+          <div class="notification-info">
+            <h4>Product Recommendations</h4>
+            <p>Personalized product suggestions based on your interests</p>
+          </div>
+          <input type="checkbox" class="toggle-switch">
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Tab -->
+    <div *ngIf="activeTab === 'orders'" class="tab-content">
+      <div class="content-header">
+        <h2>Order History</h2>
+        <p>View, track, and manage all your orders</p>
+      </div>
+
+      <div class="orders-summary">
+        <div class="summary-card">
+          <div class="summary-value">{{ userOrders.length }}</div>
+          <div class="summary-label">Total Orders</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-value">₹{{ totalOrderValue | number }}</div>
+          <div class="summary-label">Total Spent</div>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div *ngIf="ordersLoading" class="loading-state">
+        <i class="fas fa-spinner fa-spin"></i>
+        Loading your orders...
+      </div>
+
+      <!-- Error message -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ errorMessage }}
+        <button class="btn-close" (click)="errorMessage = ''">×</button>
+      </div>
+
+      <!-- Success message -->
+      <div *ngIf="successMessage" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        {{ successMessage }}
+        <button class="btn-close" (click)="successMessage = ''">×</button>
+      </div>
+
+      <div class="orders-section" *ngIf="userOrders.length > 0 && !ordersLoading; else noOrders">
+        <div class="orders-list">
+          <div class="order-item" *ngFor="let order of userOrders; let i = index">
+            <div class="order-header">
+              <div class="order-id">
+                <span class="label">Order #{{ order.id }}</span>
+                <span class="date">{{ order.createdAt | date: 'MMM dd, yyyy' }}</span>
+              </div>
+              <div class="order-status-badge">
+                <span [class]="'status-badge ' + getStatusBadgeClass(order.status)">
+                  {{ order.status | uppercase }}
+                </span>
+              </div>
+            </div>
+
+            <div class="order-details">
+              <div class="detail-item">
+                <span class="detail-label">Amount</span>
+                <span class="detail-value">₹{{ order.pricing.total | number }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Items</span>
+                <span class="detail-value">{{ order.items.length || 0 }} item(s)</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Delivery Address</span>
+                <span class="detail-value">{{ order.deliveryAddress.city }}, {{ order.deliveryAddress.state }}</span>
+              </div>
+            </div>
+
+            <div class="order-actions">
+              <button class="action-btn btn-info" (click)="viewOrderDetails(order.id)" title="View full order details">
+                <i class="fas fa-eye"></i>
+                <span>View Details</span>
+              </button>
+              <button class="action-btn btn-primary" (click)="trackOrder(order.id)" title="Track your order">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Track Order</span>
+              </button>
+              <button class="action-btn btn-success" (click)="shareViaWhatsApp(order)" title="Share order via WhatsApp">
+                <i class="fab fa-whatsapp"></i>
+                <span>WhatsApp</span>
+              </button>
+              <button 
+                class="action-btn btn-danger" 
+                (click)="cancelOrder(order.id)"
+                [disabled]="!canCancelOrder(order) || ordersLoading"
+                [title]="canCancelOrder(order) ? 'Cancel this order' : 'Cannot cancel ' + order.status + ' orders'">
+                <i class="fas fa-times"></i>
+                <span>Cancel Order</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noOrders>
+        <div class="empty-state">
+          <i class="fas fa-shopping-bag"></i>
+          <h3>No Orders Yet</h3>
+          <p>You haven't placed any orders yet. Start shopping to see your order history here.</p>
+          <button class="btn btn-primary" routerLink="/shop">
+            <i class="fas fa-shopping-cart"></i> Start Shopping
+          </button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Cancel Order Confirmation Modal -->
+  <app-confirmation-modal
+    [isOpen]="showCancelModal"
+    title="Cancel Order?"
+    message="Are you sure you want to cancel this order? This action cannot be undone."
+    confirmText="Yes, Cancel Order"
+    cancelText="Keep Order"
+    [isDangerous]="true"
+    (confirm)="confirmCancel()"
+    (cancel)="closeCancelModal()">
+  </app-confirmation-modal>
+
+  <!-- Phone Verification Modal -->
+  <app-phone-verification-modal
+    *ngIf="showPhoneVerificationModal"
+    [phoneNumber]="pendingPhoneNumber"
+    [userName]="currentUser?.name || ''"
+    (verified)="onPhoneVerified($event)"
+    (skipped)="onPhoneVerified(false)">
+  </app-phone-verification-modal>
+
+  <!-- Messages -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    <i class="fas fa-check-circle"></i>
+    <span>{{ successMessage }}</span>
+  </div>
+</div>

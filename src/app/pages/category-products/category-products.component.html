@@ -1,0 +1,96 @@
+<div class="category-products-container">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a routerLink="/">Home</a> <span class="separator">/</span>
+    <span class="current">{{ categoryName }}</span>
+    <ng-container *ngIf="subcategoryName">
+      <span class="separator">/</span>
+      <span class="current">{{ subcategoryName }}</span>
+    </ng-container>
+  </div>
+  <!-- Header -->
+  <div class="category-header">
+    <h1>{{ categoryName }}<span *ngIf="subcategoryName"> / {{ subcategoryName }}</span></h1>
+    <p class="product-count">{{ totalProducts }} Products</p>
+  </div>
+
+  <!-- Subcategory Cards Section (Only show if viewing main category, not a subcategory) -->
+  <div *ngIf="!subcategorySlug && subcategories.length > 0" class="subcategories-section">
+    <h2>Browse by Subcategory</h2>
+    <div class="subcategories-grid">
+      <app-subcategory-card *ngFor="let subcat of subcategories" [categorySlug]="categorySlug"
+        [subcategoryName]="subcat.name" [subcategorySlug]="subcat.slug" [productCount]="subcat.count"
+        [imageUrl]="subcat.image || '/assets/images/products/' + subcat.slug + '/placeholder.jpg'"></app-subcategory-card>
+    </div>
+  </div>
+
+  <!-- Search and Filter Section -->
+  <div class="search-filter-section">
+    <div class="search-box">
+      <input type="text" placeholder="Search products..." [(ngModel)]="searchTerm" (keyup.enter)="search()"
+        class="search-input" />
+      <button (click)="search()" class="search-btn">
+        <span>🔍</span> Search
+      </button>
+    </div>
+
+    <!-- Brand Filter -->
+    <div class="filter-section">
+      <h3>Brand</h3>
+      <div class="brand-filter">
+        <button *ngFor="let brand of brands" [class.active]="selectedBrand === brand" (click)="filterByBrand(brand)"
+          class="brand-btn">
+          {{ brand }}
+        </button>
+      </div>
+
+      <button *ngIf="selectedBrand || searchTerm" (click)="clearFilters()" class="clear-btn">
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <p>Loading products...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error">
+    <p>{{ error }}</p>
+    <button (click)="loadProducts()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- No Products -->
+  <div *ngIf="!loading && products.length === 0 && !error" class="no-products">
+    <p>No products found matching your criteria.</p>
+    <button (click)="clearFilters()" class="clear-btn">Clear Filters</button>
+  </div>
+
+  <!-- Products Grid -->
+  <div *ngIf="!loading && products.length > 0" class="products-grid">
+    <app-product-card *ngFor="let product of products" [product]="product"></app-product-card>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && products.length > 0" class="pagination">
+    <button (click)="previousPage()" [disabled]="currentPage === 1" class="pagination-btn">
+      ← Previous
+    </button>
+
+    <div class="pagination-pages">
+      <button *ngFor="let page of pages" [class.active]="page === currentPage" (click)="goToPage(page)"
+        class="page-btn">
+        {{ page }}
+      </button>
+    </div>
+
+    <button (click)="nextPage()" [disabled]="!hasMorePages" class="pagination-btn">
+      Next →
+    </button>
+
+    <span class="page-info">
+      Page {{ currentPage }} of {{ totalPages }} ({{ totalProducts }} total products)
+    </span>
+  </div>
+</div>

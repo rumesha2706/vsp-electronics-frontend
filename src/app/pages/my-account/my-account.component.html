@@ -1,0 +1,212 @@
+<div class="my-account-container">
+  <!-- Account Dashboard -->
+  <div class="account-dashboard" *ngIf="isLoggedIn && currentUser">
+    <div class="dashboard-header">
+      <h1>My Account</h1>
+      <button class="btn btn-secondary" (click)="onLogout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-error" *ngIf="errorMessage()">
+      <i class="fas fa-exclamation-circle"></i> {{ errorMessage() }}
+    </div>
+
+    <!-- Success Message -->
+    <div class="alert alert-success" *ngIf="successMessage()">
+      <i class="fas fa-check-circle"></i> {{ successMessage() }}
+    </div>
+
+    <!-- View Mode -->
+    <div *ngIf="editMode() === 'view'" class="user-info">
+      <div class="info-card">
+        <div class="card-header">
+          <h2>Account Information</h2>
+          <button class="btn btn-small btn-primary" (click)="startEditProfile()">
+            <i class="fas fa-edit"></i> Edit Profile
+          </button>
+        </div>
+        <div class="info-row">
+          <span class="label">Name:</span>
+          <span class="value">{{ currentUser.name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Email:</span>
+          <span class="value">{{ currentUser.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Phone:</span>
+          <div class="phone-info">
+            <span class="value">{{ currentUser.phone || '❌ Not provided' }}</span>
+            <button class="btn btn-small btn-secondary" (click)="startPhoneUpdate()">
+              <i class="fas fa-phone"></i> {{ currentUser.phone ? 'Update' : 'Add' }}
+            </button>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="label">Member Since:</span>
+          <span class="value">{{ currentUser.createdAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+
+      <div class="security-card">
+        <div class="card-header">
+          <h2>Security</h2>
+        </div>
+        <button class="btn btn-secondary" (click)="startPasswordChange()">
+          <i class="fas fa-key"></i> Change Password
+        </button>
+      </div>
+
+      <div class="quick-links">
+        <h2>Quick Links</h2>
+        <a routerLink="/wishlist" class="quick-link">
+          <i class="fas fa-heart"></i> My Wishlist
+        </a>
+        <a routerLink="/cart" class="quick-link">
+          <i class="fas fa-shopping-cart"></i> My Cart
+        </a>
+        <a routerLink="/compare" class="quick-link">
+          <i class="fas fa-balance-scale"></i> Compare Products
+        </a>
+        <a routerLink="/quote" class="quick-link">
+          <i class="fas fa-file-invoice"></i> Request Quote
+        </a>
+      </div>
+    </div>
+
+    <!-- Edit Profile Mode -->
+    <div *ngIf="editMode() === 'edit-profile'" class="edit-form-container">
+      <div class="edit-form">
+        <h2>Edit Profile</h2>
+        
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input
+            type="text"
+            id="name"
+            class="form-control"
+            [(ngModel)]="editFormData().name"
+            [disabled]="isLoading()">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            class="form-control"
+            [(ngModel)]="editFormData().email"
+            [disabled]="isLoading()">
+        </div>
+
+        <div class="form-actions">
+          <button
+            class="btn btn-primary"
+            (click)="saveProfileChanges()"
+            [disabled]="isLoading()">
+            <span *ngIf="!isLoading()"><i class="fas fa-save"></i> Save Changes</span>
+            <span *ngIf="isLoading()"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+          </button>
+          <button
+            class="btn btn-secondary"
+            (click)="cancelEdit()"
+            [disabled]="isLoading()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Phone Mode -->
+    <div *ngIf="editMode() === 'edit-phone'" class="edit-form-container">
+      <div class="edit-form">
+        <h2>{{ currentUser.phone ? 'Update Phone Number' : 'Add Phone Number' }}</h2>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input
+            type="tel"
+            id="phone"
+            class="form-control"
+            placeholder="9876543210"
+            [(ngModel)]="phoneFormData().phone"
+            [disabled]="isLoading()">
+          <small class="form-text">Enter your 10-digit phone number</small>
+        </div>
+
+        <div class="form-actions">
+          <button
+            class="btn btn-primary"
+            (click)="savePhoneNumber()"
+            [disabled]="isLoading()">
+            <span *ngIf="!isLoading()"><i class="fas fa-save"></i> Save Phone Number</span>
+            <span *ngIf="isLoading()"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+          </button>
+          <button
+            class="btn btn-secondary"
+            (click)="cancelPhoneUpdate()"
+            [disabled]="isLoading()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Mode -->
+    <div *ngIf="editMode() === 'change-password'" class="edit-form-container">
+      <div class="edit-form">
+        <h2>Change Password</h2>
+        
+        <div class="form-group">
+          <label for="currentPassword">Current Password</label>
+          <input
+            type="password"
+            id="currentPassword"
+            class="form-control"
+            [(ngModel)]="passwordFormData().currentPassword"
+            [disabled]="isLoading()">
+        </div>
+
+        <div class="form-group">
+          <label for="newPassword">New Password</label>
+          <input
+            type="password"
+            id="newPassword"
+            class="form-control"
+            placeholder="Min 8 chars, 1 upper, 1 lower, 1 number, 1 special"
+            [(ngModel)]="passwordFormData().newPassword"
+            [disabled]="isLoading()">
+          <small class="form-text">Must contain uppercase, lowercase, number and special character (&#64;$!%*?&amp;)</small>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            class="form-control"
+            [(ngModel)]="passwordFormData().confirmPassword"
+            [disabled]="isLoading()">
+        </div>
+
+        <div class="form-actions">
+          <button
+            class="btn btn-primary"
+            (click)="changePassword()"
+            [disabled]="isLoading()">
+            <span *ngIf="!isLoading()"><i class="fas fa-save"></i> Change Password</span>
+            <span *ngIf="isLoading()"><i class="fas fa-spinner fa-spin"></i> Updating...</span>
+          </button>
+          <button
+            class="btn btn-secondary"
+            (click)="cancelPasswordChange()"
+            [disabled]="isLoading()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,59 @@
+<div class="container py-5">
+    <h1 class="mb-4">Order History</h1>
+
+    <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger">
+        {{ error }}
+    </div>
+
+    <div *ngIf="!loading && !error && orders.length === 0" class="text-center py-5">
+        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+        <h3>No orders found</h3>
+        <p>You haven't placed any orders yet.</p>
+        <a routerLink="/" class="btn btn-primary">Start Shopping</a>
+    </div>
+
+    <div *ngIf="!loading && !error && orders.length > 0">
+        <div class="card mb-3 order-card" *ngFor="let order of orders">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Order #{{ order.id }}</strong>
+                    <span class="text-muted ms-2">{{ order.createdAt | date:'mediumDate' }}</span>
+                </div>
+                <span class="badge" [ngClass]="{
+          'bg-warning': order.status === 'pending',
+          'bg-primary': order.status === 'processing',
+          'bg-info': order.status === 'shipped',
+          'bg-success': order.status === 'delivered',
+          'bg-danger': order.status === 'cancelled'
+        }">{{ order.status | titlecase }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="mb-1"><strong>Total:</strong> ₹{{ order.pricing.total | number }}</p>
+                        <p class="mb-1"><strong>Payment:</strong> {{ order.paymentMethod | uppercase }} ({{
+                            order.paymentStatus }})</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <!-- Future: View Details button -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center mt-4" *ngIf="totalOrders > pageSize">
+            <button class="btn btn-outline-primary me-2" (click)="prevPage()"
+                [disabled]="currentPage === 1">Previous</button>
+            <span class="align-self-center">Page {{ currentPage }}</span>
+            <button class="btn btn-outline-primary ms-2" (click)="nextPage()"
+                [disabled]="currentPage * pageSize >= totalOrders">Next</button>
+        </div>
+    </div>
+</div>

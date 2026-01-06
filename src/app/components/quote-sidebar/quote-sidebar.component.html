@@ -1,0 +1,51 @@
+<div class="quote-sidebar-overlay" [class.active]="isOpen" (click)="closeSidebar()"></div>
+
+<div class="quote-sidebar" [class.active]="isOpen">
+  <div class="sidebar-header">
+    <h2>Quote Request</h2>
+    <button class="close-btn" (click)="closeSidebar()">
+      <i class="fas fa-times"></i> Close
+    </button>
+  </div>
+
+  <div class="sidebar-content">
+    <div class="quote-items">
+      <div class="quote-item" *ngFor="let item of quoteService.getQuoteItems()">
+        <button class="remove-btn" (click)="removeItem(item.product.id)">
+          <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="item-image">
+          <img [src]="item.product.image" [alt]="item.product.name"
+               onerror="this.src='assets/images/placeholder.jpg'">
+        </div>
+
+        <div class="item-info">
+          <h3>{{ item.product.name }}</h3>
+          <p class="item-sku">SKU: {{ item.product.id }}</p>
+          
+          <div class="quantity-control">
+            <button (click)="updateQuantity(item.product.id, -1)" [disabled]="item.quantity <= 1">-</button>
+            <input type="number" [value]="item.quantity" readonly>
+            <button (click)="updateQuantity(item.product.id, 1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="footer-info">
+      <span>Total Items:</span>
+      <span class="count">{{ quoteService.quoteCount() }}</span>
+    </div>
+
+    <a routerLink="/quote" class="btn btn-view" (click)="closeSidebar()">
+      VIEW QUOTE
+    </a>
+
+    <button class="btn btn-submit" (click)="submitQuoteRequest()">
+      SUBMIT REQUEST
+    </button>
+  </div>
+</div>

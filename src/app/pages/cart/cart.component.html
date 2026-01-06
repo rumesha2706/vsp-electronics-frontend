@@ -1,0 +1,84 @@
+<div class="cart-page">
+  <div class="container">
+    <div class="back-button-container">
+      <button class="back-button" (click)="goBack()" title="Go back">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>
+    
+    <h1 class="page-title">Shopping Cart</h1>
+
+    <div class="cart-content" *ngIf="cartService.getCartItems().length > 0">
+      <div class="cart-items">
+        <div class="cart-item" *ngFor="let item of cartService.getCartItems()">
+          <div class="item-image">
+            <img [src]="item.product.image" [alt]="item.product.name" 
+                 onerror="this.src='assets/images/placeholder.jpg'">
+          </div>
+
+          <div class="item-details">
+            <h3><a [routerLink]="['/product', item.product.id]">{{ item.product.name }}</a></h3>
+            <p class="item-category">{{ item.product.category }}</p>
+            <p class="item-price">₹{{ item.product.price }}</p>
+          </div>
+
+          <div class="item-quantity">
+            <button (click)="updateQuantity(item.product.id, item.quantity - 1)">
+              <i class="fas fa-minus"></i>
+            </button>
+            <input type="number" [value]="item.quantity" readonly>
+            <button (click)="updateQuantity(item.product.id, item.quantity + 1)">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+
+          <div class="item-total">
+            <p>₹{{ item.product.price * item.quantity }}</p>
+          </div>
+
+          <button class="item-remove" (click)="removeItem(item.product.id)">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="cart-summary">
+        <h2>Cart Summary</h2>
+        
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span>₹{{ cartService.cartTotal() }}</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Shipping:</span>
+          <span>Free</span>
+        </div>
+
+        <div class="summary-row total">
+          <span>Total:</span>
+          <span>₹{{ cartService.cartTotal() }}</span>
+        </div>
+
+        <button class="btn btn-primary checkout-btn" (click)="proceedToCheckout()">
+          Proceed to Checkout
+        </button>
+
+        <button class="btn btn-secondary" routerLink="/shop">
+          Continue Shopping
+        </button>
+
+        <button class="btn-text clear-cart" (click)="clearCart()">
+          Clear Cart
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-cart" *ngIf="cartService.getCartItems().length === 0">
+      <i class="fas fa-shopping-cart"></i>
+      <h2>Your cart is empty</h2>
+      <p>Add some products to get started!</p>
+      <a routerLink="/shop" class="btn btn-primary">Start Shopping</a>
+    </div>
+  </div>
+</div>

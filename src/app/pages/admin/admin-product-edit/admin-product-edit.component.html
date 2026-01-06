@@ -1,0 +1,154 @@
+<div class="admin-product-edit">
+  <div class="header">
+    <button class="back-button" (click)="goBack()">← Back to Shop</button>
+    <h1><i class="fas fa-box"></i> {{ editingId ? 'Edit' : 'Add New' }} Product</h1>
+  </div>
+
+  <!-- Messages -->
+  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <!-- Form -->
+  <div class="form-section">
+    <div class="form-container">
+      <div class="form-group">
+        <label>Product Name *</label>
+        <input type="text" [(ngModel)]="product.name" placeholder="Enter product name" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category *</label>
+          <select [(ngModel)]="product.category" (change)="onCategoryChange()">
+            <option value="">Select Category</option>
+            <option *ngFor="let cat of categories" [value]="cat.name">{{ cat.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Subcategory</label>
+          <select [(ngModel)]="product.subcategory">
+            <option value="">Select Subcategory</option>
+            <option *ngFor="let subcat of subcategories" [value]="subcat.name">{{ subcat.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Brand</label>
+          <select [(ngModel)]="product.brand">
+            <option value="">Select Brand</option>
+            <option *ngFor="let brand of brands" [value]="brand.name">{{ brand.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="product.description" placeholder="Enter product description" rows="4"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price</label>
+          <input type="number" [(ngModel)]="product.price" placeholder="0.00" step="0.01" />
+        </div>
+
+        <div class="form-group">
+          <label>Rating</label>
+          <input type="number" [(ngModel)]="product.rating" min="0" max="5" step="0.1" />
+        </div>
+
+        <div class="form-group">
+          <label>Product URL</label>
+          <input type="text" [(ngModel)]="product.product_url" placeholder="Enter product URL" />
+        </div>
+      </div>
+
+      <!-- Product Status -->
+      <div class="form-row checkbox-row">
+        <div class="checkbox-group">
+          <input type="checkbox" [(ngModel)]="product.in_stock" id="in_stock" />
+          <label for="in_stock">In Stock</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" [(ngModel)]="product.is_hot" id="is_hot" />
+          <label for="is_hot">Hot Product</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" [(ngModel)]="product.is_new" id="is_new" />
+          <label for="is_new">New Product</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" [(ngModel)]="product.is_featured" id="is_featured" />
+          <label for="is_featured">Featured</label>
+        </div>
+      </div>
+
+      <!-- Multiple Images Upload -->
+      <div class="form-group">
+        <label>Product Images</label>
+
+        <!-- Current Images -->
+        <div *ngIf="product.images && product.images.length > 0" class="current-images">
+          <h4>Current Images</h4>
+          <div class="images-grid">
+            <div *ngFor="let img of product.images; let i = index" class="image-item">
+              <img [src]="img" [alt]="'Product image ' + (i+1)" />
+              <button type="button" (click)="removeImage(i)" class="remove-btn">
+                <i class="fas fa-times"></i>
+              </button>
+              <p class="image-label" *ngIf="i === 0">(Primary Image)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add New Images -->
+        <div class="upload-section">
+          <h4>Add New Images</h4>
+
+          <div class="upload-tabs">
+            <button class="tab-btn" [class.active]="uploadMode === 'file'" (click)="uploadMode = 'file'">
+              <i class="fas fa-upload"></i> Upload File
+            </button>
+            <button class="tab-btn" [class.active]="uploadMode === 'url'" (click)="uploadMode = 'url'">
+              <i class="fas fa-link"></i> From URL
+            </button>
+          </div>
+
+          <!-- File Upload -->
+          <div *ngIf="uploadMode === 'file'" class="upload-input-group">
+            <input type="file" #fileInput multiple accept="image/*" (change)="onFilesSelected($event)"
+              class="file-input" />
+            <p class="upload-hint">Select one or more images from your computer</p>
+            <div *ngIf="selectedFiles.length > 0" class="selected-files">
+              <p>Selected files: {{ selectedFiles.length }}</p>
+              <ul>
+                <li *ngFor="let file of selectedFiles">{{ file.name }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- URL Upload -->
+          <div *ngIf="uploadMode === 'url'" class="upload-input-group">
+            <div class="url-input-row" *ngFor="let url of infoUrlList; let i = index; trackBy: trackByIndex">
+              <input type="text" [(ngModel)]="infoUrlList[i]" placeholder="https://example.com/image.jpg"
+                class="url-input" />
+              <button (click)="removeUrlInput(i)" *ngIf="infoUrlList.length > 1" class="btn-icon danger"><i
+                  class="fas fa-trash"></i></button>
+            </div>
+            <button (click)="addUrlInput()" class="btn-text">+ Add another URL</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button class="btn btn-primary" (click)="saveProduct()" [disabled]="loading">
+          <span *ngIf="!loading">{{ editingId ? 'Update Product' : 'Create Product' }}</span>
+          <span *ngIf="loading">Saving...</span>
+        </button>
+        <button class="btn btn-secondary" (click)="goBack()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

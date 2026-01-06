@@ -1,0 +1,462 @@
+<div class="checkout-page">
+  <div class="container">
+    <!-- Back Button -->
+    <div class="back-button-container">
+      <button class="back-button" (click)="goBack()" title="Go back">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>
+
+    <!-- Header -->
+    <div class="checkout-header">
+      <h1>Checkout</h1>
+      <p>Complete your purchase with secure payment</p>
+    </div>
+
+    <!-- Success Message -->
+    <div class="alert alert-success" *ngIf="submitSuccess">
+      <i class="fas fa-check-circle"></i>
+      <div>
+        <strong>Order Placed Successfully!</strong>
+        <p>Thank you! Your order has been received. You'll receive a confirmation email shortly.</p>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-danger" *ngIf="submitError">
+      <i class="fas fa-exclamation-circle"></i>
+      <div>
+        <strong>Order Processing Error</strong>
+        <p>{{ submitError }}</p>
+      </div>
+    </div>
+
+    <div class="checkout-content" *ngIf="!submitSuccess">
+      <div class="checkout-main">
+        <form [formGroup]="checkoutForm" (ngSubmit)="submitOrder()">
+          
+          <!-- Saved Addresses Section -->
+          <div class="form-section" *ngIf="savedAddresses.length > 0">
+            <h2>Saved Addresses</h2>
+            <p class="section-hint">Select one of your previously used addresses or enter a new one below</p>
+            
+            <div class="saved-addresses-list">
+              <div class="saved-address-option" *ngFor="let address of savedAddresses">
+                <div class="address-radio">
+                  <input 
+                    type="radio" 
+                    [id]="'address-' + address.id"
+                    [value]="address.id"
+                    [(ngModel)]="selectedSavedAddressId"
+                    [ngModelOptions]="{standalone: true}"
+                    (change)="selectSavedAddress(address.id)"
+                    class="address-checkbox"
+                  >
+                  <label [for]="'address-' + address.id" class="address-label">
+                    <div class="address-header">
+                      <span class="address-label-text" *ngIf="address.label">{{ address.label }}</span>
+                      <span class="address-default-badge" *ngIf="address.isDefault">Default</span>
+                    </div>
+                    <div class="address-details">
+                      <p class="address-text">{{ address.street }}, {{ address.city }}</p>
+                      <p class="address-text">{{ address.state }}, {{ address.pincode }}</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="divider-with-text">
+                <span>OR</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Personal Information Section -->
+          <div class="form-section">
+            <h2>Shipping Information</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">First Name *</label>
+                <input 
+                  type="text" 
+                  id="firstName" 
+                  formControlName="firstName"
+                  placeholder="Enter your first name"
+                  class="form-control"
+                  [class.is-invalid]="firstName?.invalid && firstName?.touched"
+                >
+                <div class="error-message" *ngIf="firstName?.invalid && firstName?.touched">
+                  <span *ngIf="firstName?.errors?.['required']">First name is required</span>
+                  <span *ngIf="firstName?.errors?.['minlength']">First name must be at least 2 characters</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="lastName">Last Name (Optional)</label>
+                <input 
+                  type="text" 
+                  id="lastName" 
+                  formControlName="lastName"
+                  placeholder="Enter your last name"
+                  class="form-control"
+                >
+                <small class="field-hint">Pre-filled from your profile, edit if needed</small>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email *</label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  formControlName="email"
+                  placeholder="Enter your email"
+                  class="form-control"
+                  [class.is-invalid]="email?.invalid && email?.touched"
+                >
+                <div class="error-message" *ngIf="email?.invalid && email?.touched">
+                  <span *ngIf="email?.errors?.['required']">Email is required</span>
+                  <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="phone">Phone (Optional)</label>
+                <input 
+                  type="tel" 
+                  id="phone" 
+                  formControlName="phone"
+                  placeholder="Enter 10-digit phone number"
+                  class="form-control"
+                >
+                <small class="field-hint">Pre-filled from your profile, edit if needed</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Company Information Section -->
+          <div class="form-section">
+            <h2>Company Information (Optional)</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="company">Company Name</label>
+                <input 
+                  type="text" 
+                  id="company" 
+                  formControlName="company"
+                  placeholder="Enter your company name"
+                  class="form-control"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="designation">Designation</label>
+                <input 
+                  type="text" 
+                  id="designation" 
+                  formControlName="designation"
+                  placeholder="Enter your designation"
+                  class="form-control"
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Billing Address Section -->
+          <div class="form-section">
+            <h2>Billing Address</h2>
+            <div class="form-group">
+              <label for="street">Street Address *</label>
+              <input 
+                type="text" 
+                id="street" 
+                formControlName="street"
+                placeholder="Enter your street address"
+                class="form-control"
+                [class.is-invalid]="street?.invalid && street?.touched"
+              >
+              <div class="error-message" *ngIf="street?.invalid && street?.touched">
+                <span *ngIf="street?.errors?.['required']">Street address is required</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="city">City *</label>
+                <input 
+                  type="text" 
+                  id="city" 
+                  formControlName="city"
+                  placeholder="Enter your city"
+                  class="form-control"
+                  [class.is-invalid]="city?.invalid && city?.touched"
+                >
+                <div class="error-message" *ngIf="city?.invalid && city?.touched">
+                  <span *ngIf="city?.errors?.['required']">City is required</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="state">State *</label>
+                <select 
+                  id="state" 
+                  formControlName="state"
+                  class="form-control"
+                  [class.is-invalid]="state?.invalid && state?.touched"
+                >
+                  <option value="">Select your state</option>
+                  <option *ngFor="let s of states" [value]="s">{{ s }}</option>
+                </select>
+                <div class="error-message" *ngIf="state?.invalid && state?.touched">
+                  <span *ngIf="state?.errors?.['required']">State is required</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="pincode">Pincode *</label>
+                <input 
+                  type="text" 
+                  id="pincode" 
+                  formControlName="pincode"
+                  placeholder="Enter 6-digit pincode"
+                  class="form-control"
+                  [class.is-invalid]="pincode?.invalid && pincode?.touched"
+                  (change)="onPincodeChange()"
+                >
+                <div class="error-message" *ngIf="pincode?.invalid && pincode?.touched">
+                  <span *ngIf="pincode?.errors?.['required']">Pincode is required</span>
+                  <span *ngIf="pincode?.errors?.['pattern']">Please enter a valid 6-digit pincode</span>
+                </div>
+                <small>City and State will be auto-filled based on pincode</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery Address Section -->
+          <div class="form-section">
+            <h2>Delivery Address</h2>
+            <div class="checkbox-group">
+              <input 
+                type="checkbox" 
+                id="sameAsShipping" 
+                formControlName="sameAsShipping"
+                (change)="onSameAsShippingChange()"
+              >
+              <label for="sameAsShipping">Same as billing address</label>
+            </div>
+
+            <div *ngIf="!sameAsShipping?.value">
+              <div class="form-group">
+                <label for="deliveryStreet">Street Address *</label>
+                <input 
+                  type="text" 
+                  id="deliveryStreet" 
+                  formControlName="deliveryStreet"
+                  placeholder="Enter delivery street address"
+                  class="form-control"
+                >
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="deliveryCity">City *</label>
+                  <input 
+                    type="text" 
+                    id="deliveryCity" 
+                    formControlName="deliveryCity"
+                    placeholder="Enter delivery city"
+                    class="form-control"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label for="deliveryState">State *</label>
+                  <select 
+                    id="deliveryState" 
+                    formControlName="deliveryState"
+                    class="form-control"
+                  >
+                    <option value="">Select your state</option>
+                    <option *ngFor="let s of deliveryStates" [value]="s">{{ s }}</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="deliveryPincode">Pincode *</label>
+                  <input 
+                    type="text" 
+                    id="deliveryPincode" 
+                    formControlName="deliveryPincode"
+                    placeholder="Enter 6-digit pincode"
+                    class="form-control"
+                    [class.is-invalid]="deliveryPincode?.invalid && deliveryPincode?.touched && !sameAsShipping?.value"
+                    (change)="onDeliveryPincodeChange()"
+                  >
+                  <small>City and State will be auto-filled based on pincode</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Address Section -->
+          <div class="form-section save-address-section">
+            <h2>Save This Address</h2>
+            <div class="checkbox-group">
+              <input 
+                type="checkbox" 
+                id="saveAddress" 
+                [(ngModel)]="saveCurrentAddress"
+                [ngModelOptions]="{standalone: true}"
+              >
+              <label for="saveAddress">Save this address for future orders</label>
+            </div>
+
+            <div *ngIf="saveCurrentAddress" class="address-label-input">
+              <div class="form-group">
+                <label for="addressLabel">Address Label (e.g., Home, Office, Shop)</label>
+                <input 
+                  type="text" 
+                  id="addressLabel" 
+                  [(ngModel)]="addressLabel"
+                  [ngModelOptions]="{standalone: true}"
+                  placeholder="e.g., Home, Office, Warehouse"
+                  class="form-control"
+                  maxlength="30"
+                >
+                <small>This label helps you identify the address later</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Information Section -->
+          <div class="form-section">
+            <h2>Additional Information</h2>
+            <div class="form-group">
+              <label for="notes">Order Notes</label>
+              <textarea 
+                id="notes" 
+                formControlName="notes"
+                placeholder="Add any special requests or instructions..."
+                class="form-control"
+                rows="4"
+              ></textarea>
+              <small>Maximum 500 characters</small>
+            </div>
+          </div>
+
+          <!-- Terms and Conditions -->
+          <div class="form-section">
+            <div class="checkbox-group">
+              <input 
+                type="checkbox" 
+                id="termsAccepted" 
+                formControlName="termsAccepted"
+              >
+              <label for="termsAccepted">
+                I agree to the terms and conditions and privacy policy *
+              </label>
+            </div>
+            <div class="error-message" *ngIf="termsAccepted?.invalid && termsAccepted?.touched">
+              <span *ngIf="termsAccepted?.errors?.['required']">You must accept the terms</span>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button 
+              type="submit" 
+              class="btn btn-primary btn-lg"
+              [disabled]="isSubmitting"
+            >
+              <span *ngIf="!isSubmitting">
+                <i class="fas fa-check"></i> Place Order
+              </span>
+              <span *ngIf="isSubmitting">
+                <i class="fas fa-spinner fa-spin"></i> Processing...
+              </span>
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-secondary btn-lg"
+              (click)="goBackToCart()"
+              [disabled]="isSubmitting"
+            >
+              <i class="fas fa-arrow-left"></i> Back to Cart
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Order Summary Sidebar -->
+      <div class="checkout-sidebar">
+        <div class="summary-box">
+          <h3>Order Summary</h3>
+          
+          <div class="cart-items">
+            <div class="cart-item" *ngFor="let item of cartService.getCartItems()">
+              <div class="item-image">
+                <img [src]="item.product.image" [alt]="item.product.name"
+                     onerror="this.src='assets/images/placeholder.jpg'">
+              </div>
+              <div class="item-info">
+                <h4>{{ item.product.name }}</h4>
+                <p class="item-price">₹{{ item.product.price | number }}</p>
+                <p class="item-qty">Qty: {{ item.quantity }}</p>
+              </div>
+              <div class="item-total">
+                ₹{{ (item.product.price * item.quantity) | number }}
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row">
+            <span>Subtotal:</span>
+            <strong>₹{{ calculateSubtotal() | number }}</strong>
+          </div>
+
+          <div class="summary-row" [class.free-shipping]="calculateShipping() === 0">
+            <span>Shipping:</span>
+            <strong>
+              <span *ngIf="calculateShipping() === 0" class="free-label">FREE</span>
+              <span *ngIf="calculateShipping() > 0">₹{{ calculateShipping() | number }}</span>
+            </strong>
+          </div>
+
+          <div class="summary-row">
+            <span>Tax (18% GST):</span>
+            <strong>₹{{ calculateTax() | number }}</strong>
+          </div>
+
+          <div class="summary-row total">
+            <span>Order Total:</span>
+            <strong>₹{{ calculateTotal() | number }}</strong>
+          </div>
+
+          <div class="info-box">
+            <i class="fas fa-lock"></i>
+            <p>Your payment information is secure and encrypted.</p>
+          </div>
+
+          <div class="shipping-info">
+            <h4>Shipping Details</h4>
+            <p>
+              <i class="fas fa-truck"></i>
+              Standard Delivery: 3-5 business days
+            </p>
+            <p>
+              <i class="fas fa-undo"></i>
+              30-Day Returns Policy
+            </p>
+            <p>
+              <i class="fas fa-headset"></i>
+              24/7 Customer Support
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

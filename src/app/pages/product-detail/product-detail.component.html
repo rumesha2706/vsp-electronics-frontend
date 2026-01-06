@@ -1,0 +1,373 @@
+<!-- Loading State -->
+<div class="loading-container" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Loading product...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="errorMessage && !loading">
+  <div class="error-box">
+    <i class="fas fa-warning"></i>
+    <h2>{{ errorMessage }}</h2>
+    <p>The product you are looking for does not exist.</p>
+    <a routerLink="/shop" class="btn btn-primary">Back to Shop</a>
+  </div>
+</div>
+
+<div class="product-detail-page" *ngIf="product && !loading">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <div class="container">
+      <a routerLink="/">Home</a> /
+      <a [routerLink]="['/category', getCategorySlug()]">{{ product.category }}</a> /
+      <span>{{ product.name }}</span>
+    </div>
+  </div>
+
+  <!-- Real-time Viewer Info -->
+  <div class="viewer-info-bar">
+    <div class="container viewer-info-content">
+      <div class="info-section">
+        <i class="fas fa-users"></i>
+        <span class="label">Members Online:</span>
+        <span class="count">{{ globalActiveUsers() }}</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-section">
+        <i class="fas fa-eye"></i>
+        <span class="label">Viewing This Product:</span>
+        <span class="count highlight">{{ currentProductViewers() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="product-detail-grid">
+      <!-- Product Images Section -->
+      <div class="product-images-section">
+        <!-- Image Zoom Controls -->
+        <div class="image-zoom-controls" *ngIf="allProductImages.length > 0">
+          <button class="zoom-btn" (click)="zoomOut()" [disabled]="zoomLevel <= zoomMinLevel" title="Zoom out">
+            <i class="fas fa-minus"></i>
+          </button>
+          <span class="zoom-level">{{ (zoomLevel * 100) | number: '1.0-0' }}%</span>
+          <button class="zoom-btn" (click)="zoomIn()" [disabled]="zoomLevel >= zoomMaxLevel" title="Zoom in">
+            <i class="fas fa-plus"></i>
+          </button>
+          <button class="zoom-btn reset-btn" (click)="resetZoom()" [disabled]="zoomLevel === 1" title="Reset zoom">
+            <i class="fas fa-redo"></i>
+          </button>
+          <button class="zoom-btn fullscreen-btn" (click)="openLightbox(selectedImageIndex)" title="Fullscreen">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+
+        <!-- Main Image Container with Zoom -->
+        <div class="main-image-container" #mainImageContainer (mouseenter)="onMouseEnter()"
+          (mouseleave)="onMouseLeave()" (mousemove)="onMouseMove($event)">
+
+          <img [src]="selectedImage" [alt]="product.name" class="main-image" #mainImage
+            onerror="this.src='assets/images/placeholder.jpg'">
+
+          <!-- Zoom Lens -->
+          <div class="zoom-lens" *ngIf="showZoomWindow" [style.left.px]="lensLeft" [style.top.px]="lensTop"
+            [style.width.px]="lensWidth" [style.height.px]="lensHeight">
+          </div>
+
+          <!-- Product Badges -->
+          <div class="badge-container">
+            <span class="badge badge-new" *ngIf="product.isNew">New</span>
+            <span class="badge badge-hot" *ngIf="product.isHot">Hot</span>
+          </div>
+
+          <!-- 360 View Indicator -->
+          <div class="image-360-indicator" *ngIf="allProductImages.length > 1 && !showZoomWindow">
+            <span class="indicator-text">360°</span>
+            <span class="indicator-hint">Hover to rotate</span>
+          </div>
+        </div>
+
+        <!-- Pop-out Zoom Window (Outside relative container but positioned absolutely) -->
+        <div class="zoom-window" *ngIf="showZoomWindow" [style.background-image]="'url(' + selectedImage + ')'"
+          [style.background-position]="zoomBackgroundPosition" [style.background-size]="zoomBackgroundSize">
+        </div>
+        <div class="thumbnails-container" *ngIf="allProductImages.length > 0">
+          <div class="thumbnails-scroll">
+            <img *ngFor="let img of allProductImages; let i = index" [src]="img"
+              [alt]="product.name + ' angle ' + (i+1)" (click)="selectImage(i)"
+              [class.active]="selectedImageIndex === i" class="thumbnail"
+              onerror="this.src='assets/images/placeholder.jpg'">
+          </div>
+          <!-- Navigation Arrows -->
+          <button *ngIf="allProductImages.length > 5" class="thumb-nav prev" (click)="previousImage()"
+            title="Previous angle">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button *ngIf="allProductImages.length > 5" class="thumb-nav next" (click)="nextImage()" title="Next angle">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Info Section -->
+      <div class="product-info-section">
+        <div class="product-header">
+          <div class="header-top">
+            <h1 class="product-title">{{ product.name }}</h1>
+            <button *ngIf="isAdmin()" class="btn btn-edit" (click)="editProduct()" title="Edit product">
+              <i class="fas fa-edit"></i> Edit Product
+            </button>
+          </div>
+          <span class="product-brand">Brand: <strong>{{ product.brand }}</strong></span>
+
+          <!-- About Product - Right below Brand -->
+          <div class="about-product-inline" *ngIf="product.aboutProduct">
+            <p class="about-text-inline">{{ product.aboutProduct }}</p>
+          </div>
+        </div>
+
+        <!-- Rating Section -->
+        <div class="product-rating">
+          <div class="stars">
+            <i class="fas fa-star" *ngFor="let star of [1,2,3,4,5]" [class.filled]="star <= product.rating"></i>
+          </div>
+          <span class="rating-value">{{ product.rating | number:'1.1-1' }}</span>
+          <span class="review-count">(0 reviews)</span>
+        </div>
+
+        <!-- Pricing Section -->
+        <div class="pricing-section">
+          <div class="price-display">
+            <span class="current-price">₹{{ product.price | number:'1.0-0' }}</span>
+            <span class="original-price" *ngIf="product.originalPrice">₹{{ product.originalPrice | number:'1.0-0'
+              }}</span>
+            <span class="discount-badge" *ngIf="getDiscountPercentage()">-{{ getDiscountPercentage() }}%</span>
+          </div>
+        </div>
+
+        <!-- Stock Status -->
+        <div class="stock-status" [class.in-stock]="product.inStock" [class.out-of-stock]="!product.inStock">
+          <i class="fas" [class.fa-check-circle]="product.inStock" [class.fa-times-circle]="!product.inStock"></i>
+          <span>{{ product.inStock ? 'In Stock' : 'Out of Stock' }}</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="product-actions-section">
+          <div class="quantity-selector">
+            <button class="qty-btn" (click)="decreaseQuantity()" [disabled]="quantity <= 1">−</button>
+            <input type="number" class="qty-input" [(ngModel)]="quantity" min="1" readonly>
+            <button class="qty-btn" (click)="increaseQuantity()">+</button>
+          </div>
+
+          <button class="btn btn-primary btn-quote" (click)="addToQuote()" [disabled]="!product.inStock">
+            <i class="fas fa-shopping-cart"></i> ADD TO QUOTE
+          </button>
+        </div>
+
+        <!-- Additional Actions -->
+        <div class="additional-actions">
+          <button class="action-btn" (click)="toggleWishlist()">
+            <i class="fas fa-heart" [class.active]="isInWishlist()"></i> Add to Wishlist
+          </button>
+          <button class="action-btn" (click)="addToCompare()">
+            <i class="fas fa-code-compare" [class.active]="isInCompare()"></i> {{ isInCompare() ? 'Remove Compare' :
+            'Compare' }}
+          </button>
+        </div>
+
+        <!-- Product Meta Info -->
+        <div class="product-meta-info">
+          <div class="meta-item">
+            <span class="meta-label">Category:</span>
+            <a [routerLink]="['/category', getCategorySlug()]" class="meta-value">{{ product.category }}</a>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Brand:</span>
+            <span class="meta-value">{{ product.brand }}</span>
+          </div>
+          <div class="meta-item" *ngIf="product.sku">
+            <span class="meta-label">SKU:</span>
+            <span class="meta-value">{{ product.sku }}</span>
+          </div>
+        </div>
+
+        <!-- Share Section -->
+        <div class="share-section">
+          <span class="share-label">Share:</span>
+          <a href="#" class="share-btn twitter" title="Share on Twitter">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="share-btn email" title="Share via Email">
+            <i class="fas fa-envelope"></i>
+          </a>
+          <a href="#" class="share-btn linkedin" title="Share on LinkedIn">
+            <i class="fab fa-linkedin"></i>
+          </a>
+          <a href="#" class="share-btn whatsapp" title="Share on WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Tabs Section -->
+    <div class="product-tabs-section">
+      <!-- Tabs Header -->
+      <div class="tabs-header">
+        <button class="tab-btn" [class.active]="activeTab === 'description'" (click)="activeTab = 'description'">
+          Description
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'package'" (click)="activeTab = 'package'">
+          Package Includes
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'additional'" (click)="activeTab = 'additional'">
+          Additional Information
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'reviews'" (click)="activeTab = 'reviews'">
+          Reviews (0)
+        </button>
+      </div>
+
+      <!-- Tabs Content -->
+      <div class="tabs-content">
+        <!-- Description Tab -->
+        <div class="tab-panel" [class.active]="activeTab === 'description'" *ngIf="activeTab === 'description'">
+          <div class="description-content">
+            <p *ngIf="product.description">{{ product.description }}</p>
+            <p *ngIf="!product.description">No description available for this product.</p>
+          </div>
+        </div>
+
+        <!-- Package Includes Tab -->
+        <div class="tab-panel" [class.active]="activeTab === 'package'" *ngIf="activeTab === 'package'">
+          <div class="package-content">
+            <h3>Package Includes:</h3>
+            <ul class="package-list" *ngIf="product.packageIncludes && product.packageIncludes.length > 0">
+              <li *ngFor="let item of product.packageIncludes">{{ item }}</li>
+            </ul>
+            <p *ngIf="!product.packageIncludes || product.packageIncludes.length === 0" class="no-info">
+              No package information available.
+            </p>
+          </div>
+        </div>
+
+        <!-- Additional Information Tab -->
+        <div class="tab-panel" [class.active]="activeTab === 'additional'" *ngIf="activeTab === 'additional'">
+          <div class="additional-content">
+            <h3>Additional Information</h3>
+            <table class="info-table" *ngIf="product.specifications && (product.specifications | keyvalue).length > 0">
+              <tbody>
+                <tr *ngFor="let spec of product.specifications | keyvalue">
+                  <td class="spec-key">{{ spec.key }}</td>
+                  <td class="spec-value">{{ spec.value }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p *ngIf="!product.specifications || (product.specifications | keyvalue).length === 0" class="no-info">
+              No additional information available.
+            </p>
+          </div>
+        </div>
+
+        <!-- Reviews Tab -->
+        <div class="tab-panel" [class.active]="activeTab === 'reviews'" *ngIf="activeTab === 'reviews'">
+          <div class="reviews-section">
+            <div class="reviews-container">
+              <div class="reviews-left">
+                <h3>REVIEWS</h3>
+                <p class="no-reviews">There are no reviews yet.</p>
+              </div>
+              <div class="reviews-right">
+                <h4>BE THE FIRST TO REVIEW "{{ product.name }}"</h4>
+                <form class="review-form" (submit)="submitReview($event)">
+                  <div class="form-group">
+                    <label>Your rating <span class="required">*</span></label>
+                    <div class="star-rating">
+                      <i class="far fa-star" *ngFor="let star of [1,2,3,4,5]" [class.fas]="reviewRating >= star"
+                        (click)="setRating(star)"></i>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Your review <span class="required">*</span></label>
+                    <textarea [(ngModel)]="reviewText" name="review" rows="6" required></textarea>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group half-width">
+                      <label>Name <span class="required">*</span></label>
+                      <input type="text" [(ngModel)]="reviewName" name="name" required>
+                    </div>
+
+                    <div class="form-group half-width">
+                      <label>Email <span class="required">*</span></label>
+                      <input type="email" [(ngModel)]="reviewEmail" name="email" required>
+                    </div>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary">SUBMIT REVIEW</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recently Viewed Products -->
+    <section class="related-products-section">
+      <app-recently-viewed-carousel [limit]="4" variant="carousel"></app-recently-viewed-carousel>
+    </section>
+  </div>
+
+  <!-- Lightbox/Image Gallery Modal -->
+  <div class="lightbox-modal" *ngIf="showLightbox" (keydown)="onLightboxKeydown($event)" tabindex="0">
+    <div class="lightbox-overlay" (click)="closeLightbox()"></div>
+    <div class="lightbox-content">
+      <!-- Close Button -->
+      <button class="lightbox-close" (click)="closeLightbox()" title="Close (ESC)">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <!-- Main Lightbox Image -->
+      <div class="lightbox-main-container">
+        <img [src]="allProductImages[lightboxImageIndex]" [alt]="product.name + ' angle ' + (lightboxImageIndex + 1)"
+          class="lightbox-main-image" onerror="this.src='assets/images/placeholder.jpg'">
+
+        <!-- Image Counter -->
+        <div class="lightbox-counter" *ngIf="allProductImages.length > 1">
+          {{ lightboxImageIndex + 1 }} / {{ allProductImages.length }}
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="lightbox-nav">
+        <button class="lightbox-arrow prev" (click)="lightboxPrevImage()" [disabled]="lightboxImageIndex === 0"
+          title="Previous image (← arrow)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="lightbox-arrow next" (click)="lightboxNextImage()"
+          [disabled]="lightboxImageIndex === allProductImages.length - 1" title="Next image (→ arrow)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Thumbnails Strip -->
+      <div class="lightbox-thumbnails" *ngIf="allProductImages.length > 1">
+        <img *ngFor="let img of allProductImages; let i = index" [src]="img" [alt]="product.name + ' angle ' + (i + 1)"
+          class="lightbox-thumb" [class.active]="lightboxImageIndex === i" (click)="lightboxImageIndex = i"
+          onerror="this.src='assets/images/placeholder.jpg'">
+      </div>
+
+      <!-- Info Text -->
+      <div class="lightbox-info">
+        <p>Use arrow keys to navigate • Press ESC to close</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-product" *ngIf="!product">
+    <div class="container">
+      <i class="fas fa-exclamation-triangle"></i>
+      <app-auth-modal *ngIf="showAuthModal" [message]="authModalMessage" [initialTab]="authModalTab"
+        (close)="closeAuthModal()"></app-auth-modal>

@@ -1,0 +1,40 @@
+<div class="drone-carousel">
+  <!-- Main Image Display -->
+  <div class="carousel-main">
+    <img 
+      [src]="droneImages[currentIndex].src" 
+      [alt]="droneImages[currentIndex].alt"
+      class="carousel-image"
+      loading="lazy"
+      decoding="async">
+    
+    <!-- Text Overlay -->
+    <div class="carousel-overlay">
+      <ng-content></ng-content>
+    </div>
+    
+    <!-- Navigation Arrows -->
+    <button class="carousel-arrow prev" (click)="prevSlide()" aria-label="Previous image">
+      <span>❮</span>
+    </button>
+    <button class="carousel-arrow next" (click)="nextSlide()" aria-label="Next image">
+      <span>❯</span>
+    </button>
+
+    <!-- Image Counter -->
+    <div class="image-counter">
+      {{ currentIndex + 1 }} / {{ droneImages.length }}
+    </div>
+  </div>
+
+  <!-- Dots Navigation -->
+  <div class="carousel-dots">
+    <button 
+      *ngFor="let img of droneImages; let i = index" 
+      class="dot"
+      [class.active]="currentIndex === i"
+      (click)="goToSlide(i)"
+      [attr.aria-label]="'Go to image ' + (i + 1)">
+    </button>
+  </div>
+</div>

@@ -1,0 +1,512 @@
+/* ========================================
+   RESPONSIVE DESIGN - Mobile & Tablet
+   ======================================== */
+
+/* TABLET: 768px - 1024px */
+@media (max-width: 1024px) {
+  .user-management {
+    padding: 20px;
+  }
+
+  .page-header {
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+
+  .header-left h1 {
+    font-size: 24px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .header-actions .btn {
+    flex: 1;
+    min-width: 120px;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+
+  .stat-box {
+    padding: 15px;
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .stat-info h3 {
+    font-size: 24px;
+  }
+
+  .stat-info p {
+    font-size: 12px;
+  }
+
+  .filters-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .search-box {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .filter-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .users-table th,
+  .users-table td {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+
+  .user-avatar {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .grade-badge {
+    padding: 5px 12px;
+    font-size: 12px;
+    min-width: 45px;
+  }
+
+  .badge-count,
+  .activity-badge {
+    padding: 3px 10px;
+    font-size: 11px;
+  }
+
+  .action-buttons {
+    gap: 5px;
+  }
+}
+
+/* MOBILE: 480px - 768px */
+@media (max-width: 768px) {
+  .user-management {
+    padding: 15px;
+  }
+
+  .table-container {
+    display: none;
+  }
+
+  .mobile-user-cards {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .header-left h1 {
+    font-size: 20px;
+  }
+
+  .header-left h1 i {
+    display: none;
+  }
+
+  .header-left p {
+    font-size: 12px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .header-actions .btn i {
+    margin-right: 6px;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-box {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px;
+  }
+
+  .stat-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+
+  .stat-info h3 {
+    font-size: 20px;
+  }
+
+  .stat-info p {
+    font-size: 11px;
+  }
+
+  .filters-section {
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .search-box input {
+    font-size: 14px;
+    padding: 10px 12px 10px 40px;
+  }
+
+  .filter-controls {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filter-controls label {
+    font-size: 12px;
+  }
+
+  .filter-controls select {
+    width: 100%;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 15px;
+  }
+
+  .page-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .page-info {
+    width: 100%;
+    text-align: center;
+    font-size: 10px;
+    margin-top: 10px;
+  }
+
+  .modal-content {
+    width: 95% !important;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    padding: 15px;
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+  }
+
+  .modal-body {
+    padding: 15px;
+  }
+
+  .modal-footer {
+    padding: 12px 15px;
+    gap: 10px;
+  }
+
+  .modal-footer .btn {
+    flex: 1;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .modal-footer .btn i {
+    margin-right: 6px;
+  }
+
+  .form-control {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .user-form {
+    gap: 15px;
+  }
+
+  .success-message {
+    padding: 30px 15px;
+  }
+
+  .success-message i {
+    font-size: 40px;
+  }
+
+  .success-message h3 {
+    font-size: 18px;
+  }
+}
+
+/* SMALL MOBILE: < 480px */
+@media (max-width: 480px) {
+  .user-management {
+    padding: 12px;
+  }
+
+  .table-container {
+    display: none;
+  }
+
+  .mobile-user-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .page-header {
+    gap: 10px;
+  }
+
+  .header-left h1 {
+    font-size: 18px;
+  }
+
+  .header-left p {
+    font-size: 11px;
+  }
+
+  .btn-back {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .header-actions .btn {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .header-actions .btn i {
+    margin-right: 4px;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stat-box {
+    padding: 10px;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .stat-info h3 {
+    font-size: 18px;
+  }
+
+  .stat-info p {
+    font-size: 10px;
+  }
+
+  .filters-section {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .search-box input {
+    font-size: 14px;
+    padding: 8px 10px 8px 35px;
+  }
+
+  .search-box i {
+    left: 12px;
+  }
+
+  .user-card {
+    border-radius: 8px;
+  }
+
+  .card-header {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .user-info-mobile .user-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .user-info-mobile .user-name {
+    font-size: 13px;
+  }
+
+  .card-body {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .card-row {
+    font-size: 11px;
+  }
+
+  .card-row .label {
+    min-width: 70px;
+  }
+
+  .card-actions {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .btn-action {
+    padding: 6px 8px;
+    font-size: 10px;
+    gap: 4px;
+  }
+
+  .btn-action i {
+    font-size: 12px;
+  }
+
+  .pagination {
+    padding: 12px;
+    gap: 3px;
+  }
+
+  .page-btn {
+    padding: 4px 8px;
+    font-size: 10px;
+    min-width: 35px;
+    height: 35px;
+  }
+
+  .page-info {
+    font-size: 9px;
+  }
+
+  .modal-content {
+    width: 98% !important;
+  }
+
+  .modal-header {
+    padding: 12px;
+  }
+
+  .modal-header h2 {
+    font-size: 14px;
+  }
+
+  .modal-body {
+    padding: 12px;
+  }
+
+  .modal-footer {
+    padding: 10px 12px;
+  }
+
+  .modal-footer .btn {
+    padding: 8px;
+    font-size: 11px;
+  }
+
+  .modal-footer .btn i {
+    margin-right: 4px;
+  }
+
+  .form-control {
+    padding: 9px;
+    font-size: 14px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .user-form {
+    gap: 12px;
+  }
+
+  .success-message {
+    padding: 20px 10px;
+  }
+
+  .success-message i {
+    font-size: 35px;
+    margin-bottom: 10px;
+  }
+
+  .success-message h3 {
+    font-size: 16px;
+    margin: 10px 0 8px 0;
+  }
+
+  .success-message p {
+    font-size: 12px;
+  }
+
+  .error-message {
+    font-size: 11px;
+  }
+
+  .no-results {
+    padding: 40px 15px;
+  }
+
+  .no-results i {
+    font-size: 48px;
+  }
+
+  .no-results h3 {
+    font-size: 16px;
+  }
+
+  .no-results p {
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,19 @@
+<div class="subcategory-nav" *ngIf="!loading && subcategories.length > 0">
+  <div class="subcategory-container">
+    <!-- View All option -->
+    <a [routerLink]="['/category', getCategorySlug()]" 
+       [class.active]="!activeSubcategorySlug"
+       class="subcategory-link">
+      <span class="name">All</span>
+    </a>
+
+    <!-- Individual subcategories -->
+    <a *ngFor="let subcat of subcategories"
+       [routerLink]="['/category', getCategorySlug(), subcat.slug]"
+       [class.active]="activeSubcategorySlug === subcat.slug"
+       class="subcategory-link">
+      <span class="name">{{ subcat.name }}</span>
+      <span class="count">{{ subcat.count }}</span>
+    </a>
+  </div>
+</div>

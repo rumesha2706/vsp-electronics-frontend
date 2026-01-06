@@ -1,0 +1,184 @@
+<div class="confirmation-page">
+  <div class="container">
+    <div class="confirmation-card">
+      <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+
+      <h1>Order Confirmed!</h1>
+      <p class="confirmation-message">
+        Thank you for your order. Your order has been successfully placed.
+      </p>
+
+      <div class="order-id-box">
+        <p class="label">Order Number</p>
+        <p class="order-id">{{ orderId }}</p>
+      </div>
+
+      <div class="confirmation-details">
+        <div class="detail-item">
+          <i class="fas fa-envelope"></i>
+          <div>
+            <p class="detail-label">Confirmation Email</p>
+            <p class="detail-text">You will receive an order confirmation email shortly</p>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <i class="fas fa-truck"></i>
+          <div>
+            <p class="detail-label">Delivery Timeline</p>
+            <p class="detail-text">Expected delivery in 3-5 business days</p>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <i class="fas fa-headset"></i>
+          <div>
+            <p class="detail-label">Need Help?</p>
+            <p class="detail-text">Contact our customer support team 24/7</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <a routerLink="/shop" class="btn btn-primary">
+          <i class="fas fa-shopping-bag"></i> Continue Shopping
+        </a>
+        <button (click)="shareViaWhatsApp()" class="btn btn-success" *ngIf="order">
+          <i class="fab fa-whatsapp"></i> Share via WhatsApp
+        </button>
+        <button (click)="openNotificationModal()" class="btn btn-info">
+          <i class="fas fa-bell"></i> Send Notifications
+        </button>
+        <a routerLink="/" class="btn btn-secondary">
+          <i class="fas fa-home"></i> Back to Home
+        </a>
+      </div>
+
+      <div class="info-box">
+        <h3>What's Next?</h3>
+        <ol>
+          <li>You will receive an order confirmation email with tracking information</li>
+          <li>Your order will be processed and prepared for shipment</li>
+          <li>You'll receive a shipping notification with tracking number</li>
+          <li>Track your order using the tracking number provided</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Modal -->
+  <div class="notification-modal" *ngIf="showNotificationModal">
+    <div class="modal-overlay" (click)="closeNotificationModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>
+          <i class="fas fa-bell"></i> Send Order Notifications
+        </h2>
+        <button class="close-btn" (click)="closeNotificationModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Success Message -->
+        <div class="alert alert-success" *ngIf="notificationSuccess && notificationMessage">
+          {{ notificationMessage }}
+        </div>
+
+        <!-- Error/Info Message -->
+        <div class="alert alert-info" *ngIf="!notificationSuccess && notificationMessage">
+          {{ notificationMessage }}
+        </div>
+
+        <!-- WhatsApp Option -->
+        <div class="notification-option">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="notificationSettings.sendWhatsApp"
+              [disabled]="notificationLoading"
+            >
+            <span>
+              <i class="fab fa-whatsapp"></i> Send via WhatsApp
+            </span>
+          </label>
+          <div class="option-input" *ngIf="notificationSettings.sendWhatsApp">
+            <input 
+              type="text" 
+              placeholder="Phone number (e.g., +919876543210)"
+              [(ngModel)]="notificationSettings.phoneNumber"
+              [disabled]="notificationLoading"
+              class="form-control"
+            >
+            <small>Enter your WhatsApp-enabled phone number</small>
+          </div>
+        </div>
+
+        <!-- Email Option -->
+        <div class="notification-option">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="notificationSettings.sendEmail"
+              [disabled]="notificationLoading"
+            >
+            <span>
+              <i class="fas fa-envelope"></i> Send via Email
+            </span>
+          </label>
+          <div class="option-input" *ngIf="notificationSettings.sendEmail">
+            <input 
+              type="email" 
+              placeholder="Email address"
+              [(ngModel)]="notificationSettings.email"
+              [disabled]="notificationLoading"
+              class="form-control"
+            >
+            <small>Enter your email address</small>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary" *ngIf="order">
+          <h4>Order Summary</h4>
+          <div class="summary-item">
+            <span>Order ID:</span>
+            <strong>{{ order.id }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Amount:</span>
+            <strong>₹{{ order.pricing.total || 0 | number: '1.2-2' }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Items:</span>
+            <strong>{{ order.items.length || 0 }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          class="btn btn-secondary" 
+          (click)="closeNotificationModal()"
+          [disabled]="notificationLoading"
+        >
+          Cancel
+        </button>
+        <button 
+          class="btn btn-success" 
+          (click)="sendOrderNotifications()"
+          [disabled]="notificationLoading || (!notificationSettings.sendWhatsApp && !notificationSettings.sendEmail)"
+        >
+          <span *ngIf="!notificationLoading">
+            <i class="fas fa-send"></i> Send Notifications
+          </span>
+          <span *ngIf="notificationLoading">
+            <i class="fas fa-spinner fa-spin"></i> Sending...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,92 @@
+<div class="admin-brands">
+  <div class="header">
+    <div>
+      <button class="btn btn-secondary" (click)="goBack()" title="Go back to dashboard">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+      <h1><i class="fas fa-copyright"></i> Manage Brands</h1>
+    </div>
+    <button class="btn btn-primary" (click)="openForm()" *ngIf="!showForm">
+      <i class="fas fa-plus"></i> Add New Brand
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <!-- Form -->
+  <div class="form-section" *ngIf="showForm">
+    <div class="form-container">
+      <h2>{{ editingId ? 'Edit' : 'Add New' }} Brand</h2>
+      
+      <div class="form-group">
+        <label>Brand Name *</label>
+        <input type="text" [(ngModel)]="formData.name" placeholder="Enter brand name" />
+      </div>
+
+      <div class="form-group">
+        <label>Website</label>
+        <input type="url" [(ngModel)]="formData.website" placeholder="https://example.com" />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="formData.description" placeholder="Enter brand description"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Display Order</label>
+        <input type="number" [(ngModel)]="formData.display_order" />
+      </div>
+
+      <div class="form-group">
+        <label>Brand Logo</label>
+        <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+        <small>Select a logo image to upload</small>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-success" (click)="saveBrand()" [disabled]="loading">
+          {{ loading ? 'Saving...' : 'Save Brand' }}
+        </button>
+        <button class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Brands List -->
+  <div class="brands-section">
+    <div *ngIf="loading && brands.length === 0" class="loading">Loading brands...</div>
+    
+    <div class="brands-grid" *ngIf="brands.length > 0">
+      <div class="brand-card" *ngFor="let brand of brands">
+        <div class="card-logo">
+          <img [src]="brand.image || brand.logo_url || '/assets/images/placeholder.jpg'" 
+               [alt]="brand.name"
+               (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
+        </div>
+        <div class="card-content">
+          <h3>{{ brand.name }}</h3>
+          <p class="description">{{ brand.description }}</p>
+          <p class="website" *ngIf="brand.website">
+            <a [href]="brand.website" target="_blank">Visit Website</a>
+          </p>
+          <p class="meta">Order: {{ brand.display_order }}</p>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-info" (click)="openForm(brand)">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-danger" (click)="deleteBrand(brand.id)">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-data" *ngIf="!loading && brands.length === 0">
+      No brands found. <a (click)="openForm()" class="link">Create one now</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,442 @@
+<div class="quote-checkout-page">
+  <div class="container">
+    <!-- Progress Bar -->
+    <div class="checkout-progress">
+      <div class="progress-item" [class.active]="currentStep === 'form'" [class.completed]="currentStep !== 'form'">
+        <div class="progress-circle">
+          <span *ngIf="currentStep === 'form'">1</span>
+          <i *ngIf="currentStep !== 'form'" class="fas fa-check"></i>
+        </div>
+        <div class="progress-label">Order Details</div>
+      </div>
+      <div class="progress-line" [class.active]="currentStep !== 'form'"></div>
+      <div class="progress-item" [class.active]="currentStep === 'confirm'"
+        [class.completed]="currentStep === 'success'">
+        <div class="progress-circle">
+          <span *ngIf="currentStep !== 'success'">2</span>
+          <i *ngIf="currentStep === 'success'" class="fas fa-check"></i>
+        </div>
+        <div class="progress-label">Review & Confirm</div>
+      </div>
+      <div class="progress-line" [class.active]="currentStep === 'success'"></div>
+      <div class="progress-item" [class.active]="currentStep === 'success'">
+        <div class="progress-circle">
+          <i class="fas fa-check"></i>
+        </div>
+        <div class="progress-label">Order Placed</div>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="checkout-header">
+      <h1><i class="fas fa-shopping-bag"></i> Secure Checkout</h1>
+      <p *ngIf="currentStep !== 'success'">Complete your order in just a few clicks</p>
+      <p *ngIf="currentStep === 'success'"><i class="fas fa-check-circle"></i> Order Successfully Placed!</p>
+    </div>
+
+    <!-- Step 1: Order Details Form -->
+    <div class="checkout-form-wrapper" *ngIf="currentStep === 'form'">
+      <div class="checkout-main">
+        <form [formGroup]="quoteForm" (ngSubmit)="submitQuote()">
+
+          <!-- Personal Information Section -->
+          <div class="form-section">
+            <h2>Personal Information</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">First Name *</label>
+                <input type="text" id="firstName" formControlName="firstName" placeholder="Enter your first name"
+                  class="form-control" [class.is-invalid]="firstName?.invalid && firstName?.touched">
+                <div class="error-message" *ngIf="firstName?.invalid && firstName?.touched">
+                  <span *ngIf="firstName?.errors?.['required']">First name is required</span>
+                  <span *ngIf="firstName?.errors?.['minlength']">First name must be at least 2 characters</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="lastName">Last Name *</label>
+                <input type="text" id="lastName" formControlName="lastName" placeholder="Enter your last name"
+                  class="form-control" [class.is-invalid]="lastName?.invalid && lastName?.touched">
+                <div class="error-message" *ngIf="lastName?.invalid && lastName?.touched">
+                  <span *ngIf="lastName?.errors?.['required']">Last name is required</span>
+                  <span *ngIf="lastName?.errors?.['minlength']">Last name must be at least 2 characters</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" formControlName="email" placeholder="Enter your email"
+                  class="form-control" [class.is-invalid]="email?.invalid && email?.touched">
+                <div class="error-message" *ngIf="email?.invalid && email?.touched">
+                  <span *ngIf="email?.errors?.['required']">Email is required</span>
+                  <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="phone">Phone *</label>
+                <input type="tel" id="phone" formControlName="phone" placeholder="Enter 10-digit phone number"
+                  class="form-control" [class.is-invalid]="phone?.invalid && phone?.touched">
+                <div class="error-message" *ngIf="phone?.invalid && phone?.touched">
+                  <span *ngIf="phone?.errors?.['required']">Phone is required</span>
+                  <span *ngIf="phone?.errors?.['pattern']">Please enter a valid 10-digit phone number</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Company Information Section -->
+          <div class="form-section">
+            <h2>Company Information</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="company">Company Name</label>
+                <input type="text" id="company" formControlName="company" placeholder="Enter your company name"
+                  class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label for="designation">Designation</label>
+                <input type="text" id="designation" formControlName="designation" placeholder="Enter your designation"
+                  class="form-control">
+              </div>
+            </div>
+          </div>
+
+          <!-- Billing Address Section -->
+          <div class="form-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="mb-0">Billing Address</h2>
+
+              <!-- Saved Address Selector -->
+              <div class="saved-address-selector" *ngIf="pastAddresses.length > 0" style="width: 250px;">
+                <select class="form-select form-select-sm" (change)="useAddress($any($event.target).value)">
+                  <option value="" disabled selected>Select a saved address...</option>
+                  <option *ngFor="let addr of pastAddresses; let i = index" [value]="i">
+                    {{ addr.city }} - {{ addr.address | slice:0:20 }}{{ addr.address.length > 20 ? '...' : '' }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="street">Street Address *</label>
+              <input type="text" id="street" formControlName="street" placeholder="Enter your street address"
+                class="form-control" [class.is-invalid]="street?.invalid && street?.touched">
+              <div class="error-message" *ngIf="street?.invalid && street?.touched">
+                <span *ngIf="street?.errors?.['required']">Street address is required</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="city">City *</label>
+                <input type="text" id="city" formControlName="city" placeholder="Enter your city" class="form-control"
+                  [class.is-invalid]="city?.invalid && city?.touched">
+                <div class="error-message" *ngIf="city?.invalid && city?.touched">
+                  <span *ngIf="city?.errors?.['required']">City is required</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="state">State *</label>
+                <input type="text" id="state" formControlName="state" placeholder="Enter your state"
+                  class="form-control" [class.is-invalid]="state?.invalid && state?.touched">
+                <div class="error-message" *ngIf="state?.invalid && state?.touched">
+                  <span *ngIf="state?.errors?.['required']">State is required</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="pincode">Pincode *</label>
+                <input type="text" id="pincode" formControlName="pincode" placeholder="Enter 6-digit pincode"
+                  class="form-control" [class.is-invalid]="pincode?.invalid && pincode?.touched">
+                <div class="error-message" *ngIf="pincode?.invalid && pincode?.touched">
+                  <span *ngIf="pincode?.errors?.['required']">Pincode is required</span>
+                  <span *ngIf="pincode?.errors?.['pattern']">Please enter a valid 6-digit pincode</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery Address Section -->
+          <div class="form-section">
+            <h2>Delivery Address</h2>
+            <div class="checkbox-group">
+              <input type="checkbox" id="sameAsShipping" formControlName="sameAsShipping"
+                (change)="onSameAsShippingChange()">
+              <label for="sameAsShipping">Same as billing address</label>
+            </div>
+
+            <div *ngIf="!sameAsShipping?.value">
+              <div class="form-group">
+                <label for="deliveryStreet">Street Address *</label>
+                <input type="text" id="deliveryStreet" formControlName="deliveryStreet"
+                  placeholder="Enter delivery street address" class="form-control">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="deliveryCity">City *</label>
+                  <input type="text" id="deliveryCity" formControlName="deliveryCity" placeholder="Enter delivery city"
+                    class="form-control">
+                </div>
+
+                <div class="form-group">
+                  <label for="deliveryState">State *</label>
+                  <input type="text" id="deliveryState" formControlName="deliveryState"
+                    placeholder="Enter delivery state" class="form-control">
+                </div>
+
+                <div class="form-group">
+                  <label for="deliveryPincode">Pincode *</label>
+                  <input type="text" id="deliveryPincode" formControlName="deliveryPincode"
+                    placeholder="Enter 6-digit pincode" class="form-control"
+                    [class.is-invalid]="deliveryPincode?.invalid && deliveryPincode?.touched && !sameAsShipping?.value">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Information Section -->
+          <div class="form-section">
+            <h2>Additional Information</h2>
+            <div class="form-group">
+              <label for="notes">Notes or Special Requests</label>
+              <textarea id="notes" formControlName="notes" placeholder="Add any special notes or requirements..."
+                class="form-control" rows="4"></textarea>
+              <small>Maximum 500 characters</small>
+            </div>
+
+            <!-- Business Support Info -->
+            <div class="support-info">
+              <i class="fas fa-headset"></i>
+              <div>
+                <p><strong>Need Help?</strong></p>
+                <p>Our support team is available 24/7</p>
+                <p class="contact">📞 +91 XXXXX XXXXX | 📧 support&#64;vslelectronics.com</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms and Conditions -->
+          <div class="form-section">
+            <div class="checkbox-group">
+              <input type="checkbox" id="termsAccepted" formControlName="termsAccepted">
+              <label for="termsAccepted">
+                I agree to the terms and conditions and privacy policy *
+              </label>
+            </div>
+            <div class="error-message" *ngIf="termsAccepted?.invalid && termsAccepted?.touched">
+              <span *ngIf="termsAccepted?.errors?.['required']">You must accept the terms</span>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg" [disabled]="isSubmitting">
+              <span *ngIf="!isSubmitting">
+                <i class="fas fa-arrow-right"></i> Review Order
+              </span>
+              <span *ngIf="isSubmitting">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+              </span>
+            </button>
+            <button type="button" class="btn btn-secondary btn-lg" (click)="goBackToQuote()" [disabled]="isSubmitting">
+              <i class="fas fa-arrow-left"></i> Back to Quote
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Quote Summary Sidebar -->
+      <div class="checkout-sidebar">
+        <div class="summary-box">
+          <h3><i class="fas fa-receipt"></i> Order Summary</h3>
+
+          <div class="quote-items">
+            <div class="quote-item" *ngFor="let item of quoteService.getQuoteItems()">
+              <div class="item-image">
+                <img [src]="item.product.image" [alt]="item.product.name"
+                  onerror="this.src='assets/images/placeholder.jpg'">
+              </div>
+              <div class="item-info">
+                <h4>{{ item.product.name }}</h4>
+                <p class="item-price">₹{{ item.product.price | number }}</p>
+                <p class="item-qty">Qty: {{ item.quantity }}</p>
+              </div>
+              <div class="item-total">
+                ₹{{ (item.product.price * item.quantity) | number }}
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row">
+            <span>Total Items:</span>
+            <strong>{{ quoteService.quoteCount() }}</strong>
+          </div>
+
+          <div class="summary-row total">
+            <span>Total Amount:</span>
+            <strong>₹{{ calculateTotal() | number }}</strong>
+          </div>
+
+          <div class="secure-badge">
+            <i class="fas fa-lock"></i>
+            <span>Secure Checkout</span>
+          </div>
+
+          <div class="info-box">
+            <i class="fas fa-truck"></i>
+            <p>Free shipping on orders above ₹500</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Order Confirmation -->
+    <div class="confirmation-modal-backdrop" *ngIf="currentStep === 'confirm'" (click)="goBackToForm()">
+      <div class="confirmation-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2><i class="fas fa-clipboard-list"></i> Review Your Order</h2>
+          <button class="close-btn" (click)="goBackToForm()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Customer Info -->
+          <div class="review-section">
+            <h3>Delivery To</h3>
+            <div class="review-content">
+              <p><strong>{{ quoteForm.get('firstName')?.value }} {{ quoteForm.get('lastName')?.value }}</strong></p>
+              <p>{{ quoteForm.get('phone')?.value }}</p>
+              <p>{{ quoteForm.get('email')?.value }}</p>
+            </div>
+          </div>
+
+          <!-- Address Info -->
+          <div class="review-section">
+            <h3>Delivery Address</h3>
+            <div class="review-content">
+              <p>{{ quoteForm.get('street')?.value }}<br>
+                {{ quoteForm.get('city')?.value }}, {{ quoteForm.get('state')?.value }} - {{
+                quoteForm.get('pincode')?.value }}</p>
+            </div>
+          </div>
+
+          <!-- Order Items -->
+          <div class="review-section">
+            <h3>Order Items</h3>
+            <div class="review-items">
+              <div class="review-item" *ngFor="let item of quoteService.getQuoteItems()">
+                <div class="item-details">
+                  <span class="item-name">{{ item.product.name }}</span>
+                  <span class="item-qty">Qty: {{ item.quantity }}</span>
+                </div>
+                <span class="item-price">₹{{ (item.product.price * item.quantity) | number }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Total -->
+          <div class="order-total">
+            <div class="total-row">
+              <span>Subtotal</span>
+              <span>₹{{ calculateTotal() | number }}</span>
+            </div>
+            <div class="total-row final">
+              <span>Total Amount</span>
+              <span>₹{{ calculateTotal() | number }}</span>
+            </div>
+          </div>
+
+          <!-- WhatsApp Checkbox -->
+          <div class="whatsapp-option">
+            <input type="checkbox" id="sendWhatsApp" [(ngModel)]="sendWhatsApp">
+            <label for="sendWhatsApp">
+              <i class="fab fa-whatsapp"></i> Send order confirmation via WhatsApp
+            </label>
+          </div>
+
+          <!-- Error Message -->
+          <div class="alert alert-danger" *ngIf="submitError">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ submitError }}</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="goBackToForm()" [disabled]="isSubmitting">
+            <i class="fas fa-arrow-left"></i> Back
+          </button>
+          <button class="btn btn-primary btn-lg" (click)="confirmOrder()" [disabled]="isSubmitting">
+            <span *ngIf="!isSubmitting">
+              <i class="fas fa-check"></i> Place Order
+            </span>
+            <span *ngIf="isSubmitting">
+              <i class="fas fa-spinner fa-spin"></i> Placing Order...
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Success Message -->
+    <div class="success-container" *ngIf="currentStep === 'success'">
+      <div class="success-box">
+        <div class="success-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h2>Order Placed Successfully!</h2>
+        <p class="order-number">Order Number: <strong>{{ orderNumber }}</strong></p>
+
+        <div class="success-details">
+          <div class="detail-item">
+            <i class="fas fa-envelope"></i>
+            <div>
+              <h4>Confirmation Email</h4>
+              <p>Sent to {{ quoteForm.get('email')?.value }}</p>
+            </div>
+          </div>
+          <div class="detail-item" *ngIf="sendWhatsApp">
+            <i class="fab fa-whatsapp"></i>
+            <div>
+              <h4>WhatsApp Message</h4>
+              <p>Sent to {{ quoteForm.get('phone')?.value }}</p>
+            </div>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-phone"></i>
+            <div>
+              <h4>We'll Contact You Soon</h4>
+              <p>Our team will reach out within 24 hours</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="success-amount">
+          <p>Order Total: <strong>₹{{ calculateTotal() | number }}</strong></p>
+        </div>
+
+        <div class="success-actions">
+          <button class="btn btn-primary btn-lg" (click)="router.navigate(['/'])">
+            <i class="fas fa-home"></i> Back to Home
+          </button>
+          <button class="btn btn-secondary btn-lg" (click)="router.navigate(['/quote'])">
+            <i class="fas fa-plus"></i> Request Another Quote
+          </button>
+        </div>
+
+        <div class="success-footer">
+          <p>📧 Check your email for detailed confirmation</p>
+          <p>📞 Our team will contact you within 24 hours</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
