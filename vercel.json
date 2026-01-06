@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/vsp-electronics/browser",
+  "outputDirectory": "dist/vsp-electronics",
   "installCommand": "npm install",
   "env": {
     "NG_API_URL": "@api_url"
