@@ -42,6 +42,7 @@ export class AdminCategoriesComponent implements OnInit {
     display_on_home: false
   };
 
+  imagePreview: string | null = null;
   selectedFile: File | null = null;
 
   ngOnInit() {
@@ -71,6 +72,7 @@ export class AdminCategoriesComponent implements OnInit {
     if (category) {
       this.editingId = category.id || null;
       this.formData = { ...category };
+      this.imagePreview = category.image_url || null;
     } else {
       this.editingId = null;
       this.formData = {
@@ -80,19 +82,32 @@ export class AdminCategoriesComponent implements OnInit {
         display_order: 0,
         display_on_home: false
       };
+      this.imagePreview = null;
     }
     this.showForm = true;
     this.error = '';
     this.success = '';
+    this.selectedFile = null;
   }
 
   closeForm() {
     this.showForm = false;
     this.selectedFile = null;
+    this.imagePreview = null;
   }
 
   onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreview = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   async saveCategory() {
@@ -102,6 +117,7 @@ export class AdminCategoriesComponent implements OnInit {
     }
 
     this.loading = true;
+    this.error = '';
 
     try {
       // Upload image if selected
@@ -135,12 +151,14 @@ export class AdminCategoriesComponent implements OnInit {
             this.loading = false;
           },
           (error) => {
+            console.error('Save error:', error);
             this.error = error.error?.error || 'Failed to save category';
             this.loading = false;
           }
         );
     } catch (err: any) {
-      this.error = err.message || 'Failed to upload image';
+      console.error('Upload/Save error:', err);
+      this.error = err.message || 'Failed to upload image or save category';
       this.loading = false;
     }
   }
@@ -176,7 +194,7 @@ export class AdminCategoriesComponent implements OnInit {
             `${this.apiUrl}/upload/image`,
             { base64Data: base64Data, type: 'category' }
           ).toPromise();
-          
+
           resolve(response?.imageUrl || base64Data);
         } catch (err) {
           reject(err);

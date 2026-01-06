@@ -17,7 +17,7 @@
   <div class="form-section" *ngIf="showForm">
     <div class="form-container">
       <h2>{{ editingId ? 'Edit' : 'Add New' }} Category</h2>
-      
+
       <div class="form-group">
         <label>Category Name *</label>
         <input type="text" [(ngModel)]="formData.name" placeholder="Enter category name" />
@@ -42,6 +42,13 @@
 
       <div class="form-group">
         <label>Category Image</label>
+
+        <!-- Image Preview -->
+        <div class="image-preview" *ngIf="imagePreview" style="margin-bottom: 10px;">
+          <img [src]="imagePreview" alt="Category preview"
+            style="max-width: 200px; max-height: 200px; object-fit: contain; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+
         <input type="file" (change)="onFileSelected($event)" accept="image/*" />
         <small>Select an image file to upload</small>
       </div>
@@ -58,13 +65,12 @@
   <!-- Categories List -->
   <div class="categories-section">
     <div *ngIf="loading && categories.length === 0" class="loading">Loading categories...</div>
-    
+
     <div class="categories-grid" *ngIf="categories.length > 0">
       <div class="category-card" *ngFor="let category of categories">
         <div class="card-image">
-          <img [src]="category.image_url || '/assets/images/placeholder.jpg'" 
-               [alt]="category.name"
-               (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
+          <img [src]="category.image_url || '/assets/images/placeholder.jpg'" [alt]="category.name"
+            (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
         </div>
         <div class="card-content">
           <h3>{{ category.name }}</h3>
