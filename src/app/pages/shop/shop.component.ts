@@ -44,8 +44,15 @@ import { Product, Category } from '../../models/product.model';
       <!-- Filters and Shop Header -->
       <div class="shop-header">
         <div class="header-content">
-          <h1>{{ selectedBrand ? 'Brand: ' + formatBrandName(selectedBrand) : 'Shop Products' }}</h1>
+          <h1>{{ searchQuery ? 'Search Results: "' + searchQuery + '"' : (selectedBrand ? 'Brand: ' + formatBrandName(selectedBrand) : 'Shop Products') }}</h1>
           <p class="header-subtitle">{{ filteredProducts.length }} products available</p>
+          
+          <!-- Back/Clear Filters Button -->
+          <button *ngIf="selectedBrand || searchQuery" 
+            (click)="clearFilters()" 
+            class="btn-clear-filters">
+            <i class="fas fa-times-circle"></i> Clear Filters & Show All
+          </button>
         </div>
 
         <div class="shop-filters">
@@ -282,6 +289,25 @@ import { Product, Category } from '../../models/product.model';
       font-size: 14px;
       color: #999;
       margin: 0;
+    }
+
+    .btn-clear-filters {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.3s;
+    }
+
+    .btn-clear-filters:hover {
+      background-color: #d32f2f;
     }
 
     .shop-filters {
@@ -646,6 +672,7 @@ export class ShopComponent implements OnInit, OnDestroy {
   categories: Category[] = [];
   allBrands$ = this.brandsService.brands$;
   selectedBrand: string = '';
+  searchQuery: string = '';
   sortBy: string = 'name';
   isLoading = false;
   isAdmin = false;
@@ -672,12 +699,21 @@ export class ShopComponent implements OnInit, OnDestroy {
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
+        // Handle Brand
         if (params['brand']) {
           this.selectedBrand = params['brand'];
         } else {
           this.selectedBrand = '';
         }
-        // Load products from API with brand filter
+
+        // Handle Search
+        if (params['search']) {
+          this.searchQuery = params['search'];
+        } else {
+          this.searchQuery = '';
+        }
+
+        // Load products from API with filters
         this.loadProducts();
       });
   }
@@ -695,16 +731,21 @@ export class ShopComponent implements OnInit, OnDestroy {
     if (this.selectedBrand) {
       apiParams.brand = this.selectedBrand;
     }
+    if (this.searchQuery) {
+      apiParams.search = this.searchQuery;
+    }
 
     this.backendService.getProducts(apiParams)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
           const data = response.data || response;
+          console.log('ShopComponent received products:', data);
           if (Array.isArray(data)) {
             this.products = data;
             this.filterAndSort();
           } else {
+            console.warn('ShopComponent received invalid data format:', data);
             this.products = [];
             this.filteredProducts = [];
           }
@@ -735,16 +776,27 @@ export class ShopComponent implements OnInit, OnDestroy {
     }
   }
 
+  clearFilters() {
+    this.selectedBrand = '';
+    this.searchQuery = '';
+    this.router.navigate(['/shop']);
+  }
+
+  formatBrandName(slug: string): string {
+    if (!slug) return '';
+    // Capitalize first letter of each word and replace hyphens
+    return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+
+
+
+  // Sort based on selection
   onSortChange() {
     this.filterAndSort();
   }
 
   filterAndSort() {
     let result = [...this.products];
-
-    // Note: Brand filtering is now done at API level via loadProducts()
-    // No need to filter again here since API already returns filtered results
-
     // Sort based on selection
     switch (this.sortBy) {
       case 'price-low':
@@ -760,7 +812,6 @@ export class ShopComponent implements OnInit, OnDestroy {
       default:
         result.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
-
     this.filteredProducts = result;
   }
 
@@ -791,13 +842,7 @@ export class ShopComponent implements OnInit, OnDestroy {
     ).length;
   }
 
-  formatBrandName(brand: string): string {
-    // Convert slug to readable name
-    return brand
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
+
 
   onImageError(event: any) {
     event.target.src = 'assets/images/placeholder.png';

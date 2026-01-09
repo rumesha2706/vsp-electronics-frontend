@@ -5,7 +5,8 @@ import { Router } from '@angular/router';
 import { AuthService, SignupData, LoginCredentials } from '../../services/auth.service';
 import { EmailService } from '../../services/email.service';
 import { EmailVerificationService } from '../../services/email-verification.service';
-// import { GOOGLE_OAUTH_CONFIG } from '../../config/google-oauth.config';
+
+import { environment } from '../../../environments/environment';
 
 declare const google: any;
 
@@ -20,7 +21,7 @@ export class AuthModalComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
   @Input() message: string = 'Please login to continue';
   @Input() initialTab: 'login' | 'signup' | 'forgot' = 'login';
-  
+
   private authService = inject(AuthService);
   private emailService = inject(EmailService);
   private emailVerificationService = inject(EmailVerificationService);
@@ -35,7 +36,7 @@ export class AuthModalComponent implements OnInit {
   emailVerificationCode = '';
   emailVerificationToken = '';
   pendingSignupData: SignupData | null = null;
-  
+
   // Forgot password
   forgotPasswordStep = 1; // 1: enter email, 2: enter code, 3: new password
   forgotPasswordData = {
@@ -45,7 +46,7 @@ export class AuthModalComponent implements OnInit {
     confirmPassword: '',
     resetToken: ''
   };
-  
+
   // Login form
   loginData: LoginCredentials = {
     email: '',
@@ -93,7 +94,7 @@ export class AuthModalComponent implements OnInit {
     try {
       // Initialize Google Sign-In with your Client ID
       google.accounts.id.initialize({
-        client_id: 'your-google-oauth-client-id.apps.googleusercontent.com',
+        client_id: environment.googleClientId,
         callback: this.handleGoogleSignIn.bind(this),
         auto_select: false,
         itp_support: true,
@@ -103,14 +104,14 @@ export class AuthModalComponent implements OnInit {
       // Render button for the active tab
       const buttonId = this.activeTab === 'login' ? 'google-signin-login' : 'google-signin-signup';
       const buttonElement = document.getElementById(buttonId);
-      
+
       if (buttonElement) {
         // Clear previous content and render fresh button
         buttonElement.innerHTML = '';
         google.accounts.id.renderButton(
           buttonElement,
-          { 
-            theme: 'outline', 
+          {
+            theme: 'outline',
             size: 'large',
             width: '100%',
             text: 'signin_with',
@@ -128,7 +129,7 @@ export class AuthModalComponent implements OnInit {
 
   private handleGoogleSignIn(response: any) {
     console.log('Google Sign-In response received:', !!response.credential);
-    
+
     try {
       if (!response.credential) {
         console.error('No credential in response');
@@ -145,7 +146,7 @@ export class AuthModalComponent implements OnInit {
 
       const base64Url = parts[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      
+
       let decoded = atob(base64);
       const jsonPayload = decodeURIComponent(
         decoded
@@ -153,10 +154,10 @@ export class AuthModalComponent implements OnInit {
           .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
           .join('')
       );
-      
+
       const payload = JSON.parse(jsonPayload);
       console.log('Decoded payload:', { email: payload.email, name: payload.name });
-      
+
       // Create user data from Google response
       const googleUser: SignupData = {
         firstName: payload.name || '',
@@ -172,7 +173,7 @@ export class AuthModalComponent implements OnInit {
       }
 
       console.log('Attempting login with Google email:', googleUser.email);
-      
+
       // Try to login first, if fails then signup
       const loginResult = this.authService.login({
         email: googleUser.email,
@@ -220,12 +221,12 @@ export class AuthModalComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
     this.resetForms();
-    
+
     // Reset forgot password step when switching to forgot tab
     if (tab === 'forgot') {
       this.forgotPasswordStep = 1;
     }
-    
+
     // Re-initialize Google Sign-In for the new tab (only for login/signup)
     if (tab === 'login' || tab === 'signup') {
       setTimeout(() => {
@@ -428,7 +429,7 @@ export class AuthModalComponent implements OnInit {
         this.pendingSignupData = null;
         this.signupData = { firstName: '', email: '', phone: '', password: '' };
         this.confirmPassword = '';
-        
+
         // Close modal and navigate
         this.closeModal();
         this.router.navigate(['/']);
