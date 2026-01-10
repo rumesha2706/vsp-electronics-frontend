@@ -108,10 +108,24 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/']);
   }
 
+  handleUserIconClick() {
+    if (this.isLoggedIn) {
+      if (window.innerWidth <= 768) {
+        // On mobile, navigate to account directly or show a simple alert/menu
+        // For now, let's navigate to my-account as it's the most useful page
+        this.router.navigate(['/my-account']);
+      } else {
+        this.toggleUserDropdown();
+      }
+    } else {
+      this.openAuthModal();
+    }
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.user-dropdown-container')) {
+    if (!target.closest('.user-dropdown-container') && !target.closest('.mobile-user-btn')) {
       this.showUserDropdown = false;
     }
   }

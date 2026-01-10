@@ -107,6 +107,12 @@
           </div>
 
           <div class="header-icons">
+            <a class="icon-btn mobile-user-btn" (click)="handleUserIconClick()">
+              <i class="fas fa-user"></i>
+              <span class="badge" *ngIf="isLoggedIn && currentUser"
+                style="background: #4CAF50; min-width: 8px; height: 8px; padding: 0; top: 0; right: 0;"></span>
+            </a>
+
             <a routerLink="/wishlist" class="icon-btn">
               <i class="fas fa-heart"></i>
               <span class="badge" *ngIf="wishlistService.getWishlistCount() > 0">{{ wishlistService.getWishlistCount()

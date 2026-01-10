@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BackendProductService } from '../../../services/backend-product.service';
 import { SubcategoryService } from '../../../services/subcategory.service';
 import { Product } from '../../../models/product.model';
@@ -9,7 +9,7 @@ import { Product } from '../../../models/product.model';
 @Component({
     selector: 'app-admin-category-details',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterModule],
     templateUrl: './admin-category-details.component.html',
     styleUrls: ['./admin-category-details.component.css']
 })

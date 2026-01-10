@@ -76,14 +76,14 @@
 
             <div class="grid" *ngIf="products.length > 0">
                 <div class="product-card" *ngFor="let product of products">
-                    <div class="card-img">
+                    <div class="card-img" [routerLink]="['/product', product.id]" style="cursor: pointer;">
                         <span class="stock-badge" [class.out]="!product.inStock">
                             {{ product.inStock ? 'In Stock' : 'Out of Stock' }}
                         </span>
                         <img [src]="product.image || 'assets/images/placeholder.jpg'" [alt]="product.name">
                     </div>
                     <div class="card-body">
-                        <h3>{{ product.name }}</h3>
+                        <h3 [routerLink]="['/product', product.id]" style="cursor: pointer;">{{ product.name }}</h3>
                         <div class="price">₹{{ product.price }}</div>
                         <div class="meta" *ngIf="product.subcategory">
                             <i class="fas fa-angle-right" style="font-size: 10px;"></i> {{ product.subcategory }}
