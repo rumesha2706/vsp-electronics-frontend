@@ -26,6 +26,7 @@ export class HeaderComponent implements OnInit {
   searchOpen = false;
   searchQuery = '';
   compareCount = 0;
+  mobileMenuOpen = false;
   showAuthModal = false;
   authModalMessage = '';
   authModalTab: 'login' | 'signup' | 'forgot' = 'login';

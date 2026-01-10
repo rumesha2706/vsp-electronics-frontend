@@ -166,6 +166,124 @@
   white-space: nowrap;
 }
 
+/* Mobile Responsive Adjustments */
+@media (max-width: 900px) {
+  .product-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .product-images-section {
+    position: static;
+    top: auto;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .main-image-container {
+    min-height: 300px;
+    /* Smaller min-height for mobile */
+    height: auto;
+    aspect-ratio: auto;
+    /* Allow natural aspect ratio */
+  }
+
+  /* Ensure image fits within container without forcing height */
+  .main-image {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    padding: 0;
+  }
+
+  .zoom-window {
+    /* Hide zoom window on small screens */
+    display: none !important;
+  }
+
+  .price-display {
+    gap: 10px;
+  }
+
+  .current-price {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-image-container {
+    min-height: 250px;
+  }
+
+  .product-title {
+    font-size: 24px;
+  }
+
+  .loading-container {
+    height: 300px;
+  }
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 900px) {
+  .product-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .product-images-section {
+    position: static;
+    top: auto;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .main-image-container {
+    min-height: 300px;
+    /* Smaller min-height for mobile */
+    height: auto;
+    aspect-ratio: auto;
+    /* Allow natural aspect ratio */
+  }
+
+  /* Ensure image fits within container without forcing height */
+  .main-image {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    padding: 0;
+  }
+
+  .zoom-window {
+    /* Hide zoom window on small screens */
+    display: none !important;
+  }
+
+  .price-display {
+    gap: 10px;
+  }
+
+  .current-price {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-image-container {
+    min-height: 250px;
+  }
+
+  .product-title {
+    font-size: 24px;
+  }
+
+  .loading-container {
+    height: 300px;
+  }
+}
+
 .btn-edit:hover {
   background: #218838;
   transform: translateY(-2px);
