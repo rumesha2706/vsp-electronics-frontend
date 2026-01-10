@@ -20,9 +20,13 @@ export class AllCategoriesComponent implements OnInit {
   ngOnInit() {
     this.loading = true;
     this.backendService.getCategoriesWithDetails().subscribe({
-      next: (data) => {
-        // Limit to 4 categories as requested by user
-        this.categories = data.slice(0, 4);
+      next: (data: Category[]) => {
+        // Filter to show specific categories requested by user
+        const desiredSlugs = ['bms', 'shield-accessories', 'wheels', 'wireless-modules'];
+        this.categories = data.filter(cat => desiredSlugs.includes(cat.slug));
+
+        // If meant to be strictly these 4, we can sort them to match the list order too
+        this.categories.sort((a, b) => desiredSlugs.indexOf(a.slug) - desiredSlugs.indexOf(b.slug));
         this.loading = false;
       },
       error: (err) => {
