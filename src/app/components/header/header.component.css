@@ -733,31 +733,7 @@
     letter-spacing: 1px;
   }
 
-  .nav-menu {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .nav-menu li {
-    width: 100%;
-  }
-
-  .nav-menu li a {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .nav-left {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .categories-btn {
-    width: 100%;
-    justify-content: flex-start;
-    padding: 10px;
-    font-size: 13px;
-  }
+  /* .nav-menu and .nav-left styles removed to allow 992px hamburger styles to persist */
 
   .search-bar {
     max-width: 100%;
@@ -795,7 +771,6 @@
     display: flex;
   }
 
-  /* Need to ensure search bar doesn't break layout if it's too small */
   .nav-wrapper {
     flex-wrap: wrap;
   }
