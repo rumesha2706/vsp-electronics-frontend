@@ -95,6 +95,21 @@
                 (click)="closeQuoteSidebar()">Home</a></li>
             <li><a routerLink="/about-us" routerLinkActive="active" (click)="closeQuoteSidebar()">About Us</a></li>
             <li><a routerLink="/contact-us" routerLinkActive="active" (click)="closeQuoteSidebar()">Contact Us</a></li>
+            <li class="mobile-only" *ngIf="!isLoggedIn">
+              <a (click)="openAuthModal(); closeQuoteSidebar()" style="cursor: pointer;">
+                <i class="fas fa-sign-in-alt"></i> Login / Register
+              </a>
+            </li>
+            <li class="mobile-only" *ngIf="isLoggedIn">
+              <a routerLink="/my-account" (click)="closeQuoteSidebar()">
+                <i class="fas fa-user-circle"></i> My Account
+              </a>
+            </li>
+            <li class="mobile-only" *ngIf="isLoggedIn">
+              <a (click)="onLogout(); closeQuoteSidebar()" style="cursor: pointer; color: #d32f2f;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </a>
+            </li>
           </ul>
         </div>
 
