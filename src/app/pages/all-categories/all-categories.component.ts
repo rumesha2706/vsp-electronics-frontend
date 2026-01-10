@@ -21,13 +21,8 @@ export class AllCategoriesComponent implements OnInit {
     this.loading = true;
     this.backendService.getCategoriesWithDetails().subscribe({
       next: (data) => {
-        // The API returns all categories. We might want to filter specific ones 
-        // if the intention was to show only "Featured" ones, 
-        // but for "All Categories" page we likely want all of them.
-        // The original code filtered by IDs ['15', '16', '17', '18'].
-        // If the user wants ALL categories, we should show all.
-        // Assuming user wants to see what's in DB.
-        this.categories = data;
+        // Limit to 4 categories as requested by user
+        this.categories = data.slice(0, 4);
         this.loading = false;
       },
       error: (err) => {
