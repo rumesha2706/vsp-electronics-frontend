@@ -21,6 +21,7 @@ export interface Product {
   packageIncludes?: string[];
   specifications?: { [key: string]: string };
   features?: string[];
+  recentPurchaseCount?: number;
 }
 
 export interface Category {
