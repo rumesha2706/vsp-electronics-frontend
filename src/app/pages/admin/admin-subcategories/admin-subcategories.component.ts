@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { BackendProductService } from '../../../services/backend-product.service';
 import { environment } from '../../../../environments/environment';
 
 interface Subcategory {
@@ -56,7 +57,11 @@ export class AdminSubcategoriesComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/admin']);
+    if (this.selectedSubcategory) {
+      this.closeSubcategoryProducts();
+    } else {
+      this.router.navigate(['/admin']);
+    }
   }
 
   loadCategories() {
@@ -80,7 +85,7 @@ export class AdminSubcategoriesComponent implements OnInit {
           console.log('Categories API Response:', response);
           const categories = Array.isArray(response) ? response : response.data || [];
           const allSubcategories: Subcategory[] = [];
-          
+
           // Aggregate subcategories from all categories
           categories.forEach((cat: any) => {
             if (cat.subcategories && Array.isArray(cat.subcategories)) {
@@ -92,7 +97,7 @@ export class AdminSubcategoriesComponent implements OnInit {
               });
             }
           });
-          
+
           console.log('Final Subcategories Array:', allSubcategories);
           this.subcategories = allSubcategories;
           this.loading = false;
@@ -230,7 +235,7 @@ export class AdminSubcategoriesComponent implements OnInit {
             `${this.apiUrl}/upload/image`,
             { base64Data: base64Data, type: 'subcategory' }
           ).toPromise();
-          
+
           console.log('Upload response:', response);
           const uploadedUrl = response?.imageUrl || base64Data;
           console.log('Uploaded image URL:', uploadedUrl);
@@ -242,5 +247,106 @@ export class AdminSubcategoriesComponent implements OnInit {
       };
       reader.readAsDataURL(file);
     });
+  }
+  // Products State
+  products: any[] = [];
+  selectedSubcategory: Subcategory | null = null;
+  showProductModal = false;
+  selectedProduct: any | null = null;
+  productForm: any = {};
+
+  // Inject BackendProductService
+  private backendService = inject(BackendProductService);
+
+  // ... (previous methods)
+
+  // --- Subcategory Product View Logic ---
+
+  viewSubcategoryProducts(sub: Subcategory) {
+    this.selectedSubcategory = sub;
+    this.loadProducts(sub.slug || this.slugify(sub.name)); // Fallback to slugify if slug missing
+  }
+
+  closeSubcategoryProducts() {
+    this.selectedSubcategory = null;
+    this.products = [];
+  }
+
+  loadProducts(subcategorySlug: string) {
+    this.loading = true;
+    this.backendService.getProducts({ subcategory: subcategorySlug, limit: 1000 }).subscribe({
+      next: (res) => {
+        this.products = res.data || [];
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading products:', err);
+        this.error = 'Failed to load products';
+        this.loading = false;
+      }
+    });
+  }
+
+  // --- Product CRUD ---
+
+  openProductModal(product?: any) {
+    if (product) {
+      this.selectedProduct = product;
+      this.productForm = { ...product };
+    } else {
+      const activeCategoryName = this.getCategoryName(this.selectedSubcategory?.category_id || 0);
+
+      this.selectedProduct = null;
+      this.productForm = {
+        name: '',
+        brand: '',
+        price: 0,
+        image: '',
+        description: '',
+        inStock: true,
+        category: activeCategoryName, // Pre-fill category name
+        subcategory: this.selectedSubcategory?.slug // Pre-fill subcategory slug
+      };
+    }
+    this.showProductModal = true;
+  }
+
+  closeProductModal() {
+    this.showProductModal = false;
+  }
+
+  saveProduct() {
+    if (!this.productForm.name || !this.productForm.price) return;
+
+    const payload: any = { ...this.productForm };
+
+    if (this.selectedProduct) {
+      this.backendService.updateProduct(this.selectedProduct.id, payload).subscribe(() => {
+        if (this.selectedSubcategory) {
+          const slug = this.selectedSubcategory.slug || this.slugify(this.selectedSubcategory.name);
+          this.loadProducts(slug);
+        }
+        this.closeProductModal();
+      });
+    } else {
+      this.backendService.createProduct(payload).subscribe(() => {
+        if (this.selectedSubcategory) {
+          const slug = this.selectedSubcategory.slug || this.slugify(this.selectedSubcategory.name);
+          this.loadProducts(slug);
+        }
+        this.closeProductModal();
+      });
+    }
+  }
+
+  deleteProduct(product: any) {
+    if (confirm('Delete this product?')) {
+      this.backendService.deleteProduct(product.id).subscribe(() => {
+        if (this.selectedSubcategory) {
+          const slug = this.selectedSubcategory.slug || this.slugify(this.selectedSubcategory.name);
+          this.loadProducts(slug);
+        }
+      });
+    }
   }
 }

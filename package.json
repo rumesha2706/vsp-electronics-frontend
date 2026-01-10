@@ -11,7 +11,8 @@
     "build:server": "tsc -p tsconfig.server.json",
     "serve:ssr": "node out-tsc/server/main.server.js",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "deploy": "ng build --configuration production --base-href \"https://rumesha2706.github.io/vsp-electronics-frontend/\" && npx angular-cli-ghpages --dir=dist/vsp-electronics"
   },
   "private": true,
   "dependencies": {
@@ -45,6 +46,7 @@
     "@types/jasmine": "~5.1.0",
     "@types/node": "^25.0.3",
     "ajv": "^8.17.1",
+    "angular-cli-ghpages": "^2.0.3",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

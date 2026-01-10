@@ -204,6 +204,16 @@ export class AdminCategoriesComponent implements OnInit {
     });
   }
 
+  viewDetails(category: Category) {
+    if (category.slug) {
+      this.router.navigate(['/admin/categories', category.slug]);
+    } else if (category.name) {
+      // Fallback if slug is missing
+      const slug = this.slugify(category.name);
+      this.router.navigate(['/admin/categories', slug]);
+    }
+  }
+
   slugify(text: string): string {
     return text
       .toLowerCase()

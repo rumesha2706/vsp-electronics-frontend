@@ -6,7 +6,7 @@
       </button>
       <h1><i class="fas fa-copyright"></i> Manage Brands</h1>
     </div>
-    <button class="btn btn-primary" (click)="openForm()" *ngIf="!showForm">
+    <button class="btn btn-primary" (click)="openForm()">
       <i class="fas fa-plus"></i> Add New Brand
     </button>
   </div>
@@ -15,66 +15,80 @@
   <div class="alert alert-success" *ngIf="success">{{ success }}</div>
   <div class="alert alert-error" *ngIf="error">{{ error }}</div>
 
-  <!-- Form -->
-  <div class="form-section" *ngIf="showForm">
-    <div class="form-container">
-      <h2>{{ editingId ? 'Edit' : 'Add New' }} Brand</h2>
-      
-      <div class="form-group">
-        <label>Brand Name *</label>
-        <input type="text" [(ngModel)]="formData.name" placeholder="Enter brand name" />
-      </div>
+  <!-- Form Modal -->
+  <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+    <div class="form-section" (click)="$event.stopPropagation()">
+      <div class="form-container">
+        <h2>{{ editingId ? 'Edit' : 'Add New' }} Brand</h2>
 
-      <div class="form-group">
-        <label>Website</label>
-        <input type="url" [(ngModel)]="formData.website" placeholder="https://example.com" />
-      </div>
+        <div class="form-group">
+          <label>Brand Name *</label>
+          <input type="text" [(ngModel)]="formData.name" placeholder="Enter brand name" />
+        </div>
 
-      <div class="form-group">
-        <label>Description</label>
-        <textarea [(ngModel)]="formData.description" placeholder="Enter brand description"></textarea>
-      </div>
+        <div class="form-group">
+          <label>Website</label>
+          <input type="url" [(ngModel)]="formData.website" placeholder="https://example.com" />
+        </div>
 
-      <div class="form-group">
-        <label>Display Order</label>
-        <input type="number" [(ngModel)]="formData.display_order" />
-      </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="formData.description" placeholder="Enter brand description"></textarea>
+        </div>
 
-      <div class="form-group">
-        <label>Brand Logo</label>
-        <input type="file" (change)="onFileSelected($event)" accept="image/*" />
-        <small>Select a logo image to upload</small>
-      </div>
+        <div class="form-group">
+          <label>Display Order</label>
+          <input type="number" [(ngModel)]="formData.display_order" />
+        </div>
 
-      <div class="form-actions">
-        <button class="btn btn-success" (click)="saveBrand()" [disabled]="loading">
-          {{ loading ? 'Saving...' : 'Save Brand' }}
-        </button>
-        <button class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+        <div class="form-group">
+          <label>Brand Logo</label>
+
+          <!-- Image Preview -->
+          <div class="image-preview" *ngIf="formData.logo_url"
+            style="margin-bottom: 10px; text-align: center; background: #f7fafc; padding: 10px; border-radius: 8px;">
+            <img [src]="formData.logo_url" alt="Preview"
+              style="max-height: 80px; max-width: 100%; object-fit: contain;">
+          </div>
+
+          <!-- File Upload -->
+          <input type="file" (change)="onFileSelected($event)" accept="image/*" style="margin-bottom: 10px;" />
+
+          <!-- Manual Path Input -->
+          <label style="font-size: 12px; margin-top: 5px;">Or enter image path manually (e.g.,
+            assets/images/...)</label>
+          <input type="text" [(ngModel)]="formData.logo_url" placeholder="Enter image URL or path" />
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-success" (click)="saveBrand()" [disabled]="loading">
+            {{ loading ? 'Saving...' : 'Save Brand' }}
+          </button>
+          <button class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Brands List -->
-  <div class="brands-section">
+  <!-- Brands List (Show only if no brand selected) -->
+  <div class="brands-section" *ngIf="!selectedBrand">
     <div *ngIf="loading && brands.length === 0" class="loading">Loading brands...</div>
-    
+
     <div class="brands-grid" *ngIf="brands.length > 0">
-      <div class="brand-card" *ngFor="let brand of brands">
+      <div class="brand-card" *ngFor="let brand of brands" (click)="viewBrandProducts(brand)" style="cursor: pointer;">
         <div class="card-logo">
-          <img [src]="brand.image || brand.logo_url || '/assets/images/placeholder.jpg'" 
-               [alt]="brand.name"
-               (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
+          <img [src]="brand.image || brand.logo_url || '/assets/images/placeholder.jpg'" [alt]="brand.name"
+            (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
         </div>
         <div class="card-content">
           <h3>{{ brand.name }}</h3>
           <p class="description">{{ brand.description }}</p>
           <p class="website" *ngIf="brand.website">
-            <a [href]="brand.website" target="_blank">Visit Website</a>
+            <a [href]="brand.website" target="_blank" (click)="$event.stopPropagation()">Visit Website</a>
           </p>
           <p class="meta">Order: {{ brand.display_order }}</p>
         </div>
-        <div class="card-actions">
+        <div class="card-actions" (click)="$event.stopPropagation()">
           <button class="btn btn-sm btn-info" (click)="openForm(brand)">
             <i class="fas fa-edit"></i> Edit
           </button>
@@ -89,4 +103,79 @@
       No brands found. <a (click)="openForm()" class="link">Create one now</a>
     </div>
   </div>
+
+  <!-- Products List (Show if brand selected) -->
+  <div class="products-section" *ngIf="selectedBrand">
+    <div class="section-header"
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="margin: 0;">
+        Products in {{ selectedBrand.name }}
+        <button class="btn btn-sm btn-secondary" (click)="closeBrandProducts()" style="margin-left: 15px;">
+          <i class="fas fa-times"></i> Clear Filter
+        </button>
+      </h2>
+      <button class="btn btn-primary" (click)="openProductModal()">
+        <i class="fas fa-plus"></i> Add Product
+      </button>
+    </div>
+
+    <div class="brands-grid" *ngIf="products.length > 0">
+      <div class="brand-card" *ngFor="let product of products">
+        <div class="card-logo">
+          <img [src]="product.image || 'assets/images/placeholder.jpg'" [alt]="product.name">
+        </div>
+        <div class="card-content">
+          <h3>{{ product.name }}</h3>
+          <div class="description">Price: ₹{{ product.price }}</div>
+          <div class="meta" *ngIf="!product.inStock" style="color: red;">Out of Stock</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-info" (click)="openProductModal(product)">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-data" *ngIf="products.length === 0">
+      No products found in this brand. <a (click)="openProductModal()" class="link">Add one now</a>
+    </div>
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" *ngIf="showProductModal">
+    <div class="form-section">
+      <h2>{{ selectedProduct ? 'Edit' : 'Add' }} Product</h2>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="productForm.name">
+      </div>
+      <div class="form-group">
+        <label>Price</label>
+        <input type="number" [(ngModel)]="productForm.price">
+      </div>
+      <div class="form-group">
+        <label>Image URL</label>
+        <input type="text" [(ngModel)]="productForm.image">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="productForm.description"></textarea>
+      </div>
+      <div class="form-group">
+        <label>In Stock</label>
+        <input type="checkbox" [(ngModel)]="productForm.inStock">
+      </div>
+      <!-- Note: Category selection omitted for brevity, user can use main product page for full details or we add it later -->
+
+      <div class="form-actions">
+        <button class="btn btn-success" (click)="saveProduct()">Save</button>
+        <button class="btn btn-secondary" (click)="closeProductModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
 </div>

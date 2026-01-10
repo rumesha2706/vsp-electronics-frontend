@@ -25,7 +25,7 @@ export class SubcategoryService {
   private subcategoriesCache = new Map<string, Observable<Subcategory[]>>();
   private categoryIdCache = new Map<string, number>();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Clear the subcategories cache (useful for testing)
@@ -55,14 +55,14 @@ export class SubcategoryService {
         switchMap(response => {
           // API returns array directly
           const categories = Array.isArray(response) ? response : (response.data || response.categories || []);
-          
+
           console.log(`getSubcategoriesBySlug: Received ${categories.length} categories`);
-          
+
           // Find category by slug
-          const category = categories.find((c: any) => 
+          const category = categories.find((c: any) =>
             c.slug === categorySlug || this.slugify(c.name) === categorySlug
           );
-          
+
           if (!category) {
             console.warn(`Category not found with slug: ${categorySlug}`);
             return of([]);
@@ -99,16 +99,16 @@ export class SubcategoryService {
 
     // First, get category ID by slug
     const categorySlug = this.slugify(categoryName);
-    
+
     // Try to fetch from categories endpoint with subcategories data
     const observable = this.http.get<any>(`${this.apiUrl}`)
       .pipe(
         switchMap(response => {
           const categories = response.categories || response.data || [];
-          const category = categories.find((c: any) => 
+          const category = categories.find((c: any) =>
             this.slugify(c.name) === categorySlug || c.id.toString() === categorySlug
           );
-          
+
           if (!category) {
             console.warn(`Category not found: ${categoryName}`);
             return of([]);
@@ -133,7 +133,7 @@ export class SubcategoryService {
         map(response => {
           // API returns array directly or wrapped in data property
           let subcategoriesData: any[] = [];
-          
+
           if (Array.isArray(response)) {
             subcategoriesData = response;
           } else if (response && Array.isArray(response.data)) {
@@ -141,9 +141,9 @@ export class SubcategoryService {
           } else if (response && Array.isArray(response)) {
             subcategoriesData = response;
           }
-          
+
           console.log(`fetchSubcategoriesByIdDirect: Found ${subcategoriesData.length} subcategories for category ${categoryId}`);
-          
+
           // Transform DB response to match UI expectations
           return subcategoriesData.map((sub: any) => ({
             id: sub.id,
@@ -163,6 +163,27 @@ export class SubcategoryService {
         }),
         shareReplay(1)
       );
+  }
+
+  /**
+   * Create a new subcategory
+   */
+  createSubcategory(subcategory: Partial<Subcategory>): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/subcategories`, subcategory);
+  }
+
+  /**
+   * Update an existing subcategory
+   */
+  updateSubcategory(id: number, subcategory: Partial<Subcategory>): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/subcategories/${id}`, subcategory);
+  }
+
+  /**
+   * Delete a subcategory
+   */
+  deleteSubcategory(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/subcategories/${id}`);
   }
 
   /**

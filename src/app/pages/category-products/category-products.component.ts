@@ -62,12 +62,56 @@ export class CategoryProductsComponent implements OnInit {
 
       this.categorySlug = slug;
       this.subcategorySlug = subcategorySlug || '';
-      this.categoryName = this.slugToTitle(slug);
-      this.subcategoryName = subcategorySlug ? this.slugToTitle(subcategorySlug) : '';
 
-      // Load subcategories and products
-      // Pass slug directly to the service instead of the title
-      this.loadSubcategories(slug);
+      // Set initial loading state
+      this.loading = true;
+
+      // 1. Fetch proper category details first to get the correct name from DB
+      this.backendProductService.getCategoryBySlug(slug).subscribe({
+        next: (category) => {
+          if (category) {
+            console.log('Category details found:', category);
+            this.categoryName = category.name;
+
+            // 2. Load subcategories
+            this.loadSubcategories(slug);
+
+            // 3. Resolve subcategory name if slug exists
+            if (this.subcategorySlug) {
+              this.resolveSubcategoryName(category.id, this.subcategorySlug);
+            } else {
+              this.subcategoryName = '';
+              // 4. Load products with correct category name
+              this.loadProducts();
+            }
+          } else {
+            console.error('Category not found for slug:', slug);
+            this.error = 'Category not found';
+            this.loading = false;
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching category details:', err);
+          // Fallback to slug-to-title if API fails
+          this.categoryName = this.slugToTitle(slug);
+          this.subcategoryName = subcategorySlug ? this.slugToTitle(subcategorySlug) : '';
+          this.loadSubcategories(slug);
+          this.loadProducts();
+        }
+      });
+    });
+  }
+
+  resolveSubcategoryName(categoryId: number, slug: string) {
+    // We need to find the subcategory name that matches the slug
+    // We can use the subcategory service or just list from category details if available
+    this.subcategoryService.getSubcategoriesBySlug(this.categorySlug).subscribe(subs => {
+      const sub = subs.find(s => s.slug === slug);
+      if (sub) {
+        this.subcategoryName = sub.name;
+      } else {
+        this.subcategoryName = this.slugToTitle(slug);
+      }
       this.loadProducts();
     });
   }

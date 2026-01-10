@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-footer',
@@ -11,4 +11,10 @@ import { RouterModule } from '@angular/router';
 })
 export class FooterComponent {
   currentYear = new Date().getFullYear();
+
+  constructor(private router: Router) { }
+
+  get isAdminRoute(): boolean {
+    return this.router.url.includes('/admin');
+  }
 }

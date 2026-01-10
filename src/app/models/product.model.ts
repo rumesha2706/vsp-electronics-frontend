@@ -9,6 +9,7 @@ export interface Product {
   brand: string;
   rating: number;
   inStock: boolean;
+  stockCount?: number;
   isHot?: boolean;
   isNew?: boolean;
   isFeatured?: boolean;

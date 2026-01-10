@@ -26,6 +26,7 @@ import { OrdersListComponent } from './components/orders-list/orders-list.compon
 import { OrderDetailsComponent } from './components/order-details/order-details.component';
 import { OrderTrackingComponent } from './components/order-tracking/order-tracking.component';
 import { AdminCategoriesComponent } from './pages/admin/admin-categories/admin-categories.component';
+import { AdminCategoryDetailsComponent } from './pages/admin/admin-category-details/admin-category-details.component';
 import { AdminSubcategoriesComponent } from './pages/admin/admin-subcategories/admin-subcategories.component';
 import { AdminBrandsComponent } from './pages/admin/admin-brands/admin-brands.component';
 import { AdminProductEditComponent } from './pages/admin/admin-product-edit/admin-product-edit.component';
@@ -63,6 +64,7 @@ export const routes: Routes = [
       { path: 'products/add', component: ProductAddComponent },
       { path: 'users', component: UserManagementComponent },
       { path: 'categories', component: AdminCategoriesComponent },
+      { path: 'categories/:slug', component: AdminCategoryDetailsComponent },
       { path: 'subcategories', component: AdminSubcategoriesComponent },
       { path: 'brands', component: AdminBrandsComponent },
       { path: 'products/edit', component: AdminProductEditComponent },

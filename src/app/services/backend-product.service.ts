@@ -29,9 +29,11 @@ export class BackendProductService {
       originalPrice: apiProduct.original_price ? parseFloat(apiProduct.original_price) : undefined,
       image: apiProduct.image,
       category: apiProduct.category,
+      subcategory: apiProduct.subcategory,
       brand: apiProduct.brand,
       rating: parseFloat(apiProduct.rating) || 0,
       inStock: apiProduct.in_stock === true || apiProduct.in_stock === 'true',
+      stockCount: apiProduct.stock_count ? parseInt(apiProduct.stock_count) : 0,
       isHot: apiProduct.is_hot === true || apiProduct.is_hot === 'true',
       isNew: apiProduct.is_new === true || apiProduct.is_new === 'true',
       isFeatured: apiProduct.is_featured === true || apiProduct.is_featured === 'true',
@@ -156,5 +158,48 @@ export class BackendProductService {
    */
   filterByBrand(brand: string): Observable<any> {
     return this.getProducts({ brand });
+  }
+
+  /**
+   * Get all categories with details (subcategories, brands)
+   */
+  getCategoriesWithDetails(): Observable<any> {
+    const url = `${environment.apiUrl}/categories`;
+    return this.http.get<any>(url, { params: { includeDetails: 'true' } }).pipe(
+      map(response => {
+        if (Array.isArray(response)) {
+          return response.map(cat => ({
+            id: String(cat.id),
+            name: cat.name,
+            slug: cat.slug,
+            image: cat.image_url || cat.image || 'assets/images/placeholder.jpg',
+            productCount: cat.product_count || 0,
+            description: cat.description,
+            subcategories: cat.subcategories ? cat.subcategories.map((sub: any) => ({
+              id: String(sub.id),
+              name: sub.name,
+              slug: sub.slug,
+              productCount: sub.product_count || 0,
+              image: sub.image_url || sub.image
+            })) : []
+          }));
+        }
+        return response;
+      })
+    );
+  }
+  /**
+   * Get category by slug
+   */
+  getCategoryBySlug(slug: string): Observable<any> {
+    const url = `${environment.apiUrl}/categories/slug/${slug}`;
+    return this.http.get<any>(url).pipe(
+      map(response => {
+        if (response && response.data) {
+          return response.data;
+        }
+        return response;
+      })
+    );
   }
 }

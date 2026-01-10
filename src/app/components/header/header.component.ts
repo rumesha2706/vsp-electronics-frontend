@@ -1,6 +1,7 @@
 import { Component, inject, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { CartService } from '../../services/cart.service';
 import { QuoteService } from '../../services/quote.service';
 import { WishlistService } from '../../services/wishlist.service';
@@ -10,7 +11,7 @@ import { AuthModalComponent } from '../auth-modal/auth-modal.component';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, AuthModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, AuthModalComponent],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
@@ -20,9 +21,10 @@ export class HeaderComponent implements OnInit {
   wishlistService = inject(WishlistService);
   authService = inject(AuthService);
   router = inject(Router);
-  
+
   menuOpen = false;
   searchOpen = false;
+  searchQuery = '';
   compareCount = 0;
   showAuthModal = false;
   authModalMessage = '';
@@ -80,6 +82,16 @@ export class HeaderComponent implements OnInit {
 
   toggleSearch() {
     this.searchOpen = !this.searchOpen;
+  }
+
+  onSearch() {
+    if (this.searchQuery.trim()) {
+      this.router.navigate(['/shop'], {
+        queryParams: { search: this.searchQuery.trim() }
+      });
+      // Close search bar on mobile if open
+      this.searchOpen = false;
+    }
   }
 
   closeQuoteSidebar() {

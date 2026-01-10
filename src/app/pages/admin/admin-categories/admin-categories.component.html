@@ -4,7 +4,7 @@
       <button class="back-button" (click)="goBack()">← Back</button>
       <h1><i class="fas fa-folder"></i> Manage Categories</h1>
     </div>
-    <button class="btn btn-primary" (click)="openForm()" *ngIf="!showForm">
+    <button class="btn btn-primary" (click)="openForm()">
       <i class="fas fa-plus"></i> Add New Category
     </button>
   </div>
@@ -13,51 +13,53 @@
   <div class="alert alert-success" *ngIf="success">{{ success }}</div>
   <div class="alert alert-error" *ngIf="error">{{ error }}</div>
 
-  <!-- Form -->
-  <div class="form-section" *ngIf="showForm">
-    <div class="form-container">
-      <h2>{{ editingId ? 'Edit' : 'Add New' }} Category</h2>
+  <!-- Form Modal -->
+  <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+    <div class="form-section" (click)="$event.stopPropagation()">
+      <div class="form-container">
+        <h2>{{ editingId ? 'Edit' : 'Add New' }} Category</h2>
 
-      <div class="form-group">
-        <label>Category Name *</label>
-        <input type="text" [(ngModel)]="formData.name" placeholder="Enter category name" />
-      </div>
-
-      <div class="form-group">
-        <label>Description</label>
-        <textarea [(ngModel)]="formData.description" placeholder="Enter description"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>Display Order</label>
-        <input type="number" [(ngModel)]="formData.display_order" />
-      </div>
-
-      <div class="form-group">
-        <label>
-          <input type="checkbox" [(ngModel)]="formData.display_on_home" />
-          Display on Home Page
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>Category Image</label>
-
-        <!-- Image Preview -->
-        <div class="image-preview" *ngIf="imagePreview" style="margin-bottom: 10px;">
-          <img [src]="imagePreview" alt="Category preview"
-            style="max-width: 200px; max-height: 200px; object-fit: contain; border: 1px solid #ddd; border-radius: 4px;">
+        <div class="form-group">
+          <label>Category Name *</label>
+          <input type="text" [(ngModel)]="formData.name" placeholder="Enter category name" />
         </div>
 
-        <input type="file" (change)="onFileSelected($event)" accept="image/*" />
-        <small>Select an image file to upload</small>
-      </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="formData.description" placeholder="Enter description"></textarea>
+        </div>
 
-      <div class="form-actions">
-        <button class="btn btn-success" (click)="saveCategory()" [disabled]="loading">
-          {{ loading ? 'Saving...' : 'Save Category' }}
-        </button>
-        <button class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+        <div class="form-group">
+          <label>Display Order</label>
+          <input type="number" [(ngModel)]="formData.display_order" />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" [(ngModel)]="formData.display_on_home" />
+            Display on Home Page
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Category Image</label>
+
+          <!-- Image Preview -->
+          <div class="image-preview" *ngIf="imagePreview" style="margin-bottom: 10px;">
+            <img [src]="imagePreview" alt="Category preview"
+              style="max-width: 200px; max-height: 200px; object-fit: contain; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+
+          <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+          <small>Select an image file to upload</small>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-success" (click)="saveCategory()" [disabled]="loading">
+            {{ loading ? 'Saving...' : 'Save Category' }}
+          </button>
+          <button class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
@@ -67,7 +69,8 @@
     <div *ngIf="loading && categories.length === 0" class="loading">Loading categories...</div>
 
     <div class="categories-grid" *ngIf="categories.length > 0">
-      <div class="category-card" *ngFor="let category of categories">
+      <div class="category-card" *ngFor="let category of categories" (click)="viewDetails(category)"
+        style="cursor: pointer;">
         <div class="card-image">
           <img [src]="category.image_url || '/assets/images/placeholder.jpg'" [alt]="category.name"
             (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
@@ -77,7 +80,7 @@
           <p class="description">{{ category.description }}</p>
           <p class="meta">Order: {{ category.display_order }} | Home: {{ category.display_on_home ? 'Yes' : 'No' }}</p>
         </div>
-        <div class="card-actions">
+        <div class="card-actions" (click)="$event.stopPropagation()">
           <button class="btn btn-sm btn-info" (click)="openForm(category)">
             <i class="fas fa-edit"></i> Edit
           </button>

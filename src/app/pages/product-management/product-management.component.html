@@ -21,13 +21,10 @@
   <div class="filters-section">
     <div class="filter-group">
       <i class="fas fa-search"></i>
-      <input 
-        type="text" 
-        placeholder="Search by name or ID..." 
-        [(ngModel)]="searchTerm"
+      <input type="text" placeholder="Search by name or ID..." [(ngModel)]="searchTerm"
         (ngModelChange)="filterProducts()">
     </div>
-    
+
     <div class="filter-group">
       <select [(ngModel)]="selectedCategory" (ngModelChange)="filterProducts()">
         <option value="">All Categories</option>
@@ -82,18 +79,15 @@
             <span class="original-price" *ngIf="product.originalPrice">₹{{ product.originalPrice }}</span>
           </td>
           <td>
-            <button 
-              class="toggle-btn" 
-              [class.active]="product.inStock"
-              (click)="toggleStock(product)">
+            <button class="toggle-btn" [class.active]="product.inStock" (click)="toggleStock(product)">
               {{ product.inStock ? 'In Stock' : 'Out of Stock' }}
             </button>
+            <div style="font-size: 0.8rem; margin-top: 4px; color: #666;">
+              Qty: {{ product.stockCount || 0 }}
+            </div>
           </td>
           <td>
-            <button 
-              class="toggle-btn" 
-              [class.active]="product.isHot"
-              (click)="toggleHot(product)">
+            <button class="toggle-btn" [class.active]="product.isHot" (click)="toggleHot(product)">
               {{ product.isHot ? 'Yes' : 'No' }}
             </button>
           </td>
@@ -156,7 +150,8 @@
       <div class="form-row">
         <div class="form-group">
           <label>Category *</label>
-          <select [(ngModel)]="productForm.category" name="category" required (ngModelChange)="productForm.subcategory = ''">
+          <select [(ngModel)]="productForm.category" name="category" required
+            (ngModelChange)="productForm.subcategory = ''">
             <option value="">Select Category</option>
             <option *ngFor="let category of categories" [value]="category.slug">
               {{ category.name }}
@@ -190,31 +185,20 @@
 
         <div class="form-group">
           <label>Product Image *</label>
-          
+
           <div class="image-mode-toggle">
-            <button 
-              type="button" 
-              class="mode-btn" 
-              [class.active]="imageUploadMode === 'file'"
+            <button type="button" class="mode-btn" [class.active]="imageUploadMode === 'file'"
               (click)="switchImageMode('file')">
               <i class="fas fa-upload"></i> Upload File
             </button>
-            <button 
-              type="button" 
-              class="mode-btn" 
-              [class.active]="imageUploadMode === 'url'"
+            <button type="button" class="mode-btn" [class.active]="imageUploadMode === 'url'"
               (click)="switchImageMode('url')">
               <i class="fas fa-link"></i> Image URL
             </button>
           </div>
 
           <div class="image-upload-container" *ngIf="imageUploadMode === 'file'">
-            <input 
-              type="file" 
-              #fileInput1
-              (change)="onImageSelect($event)" 
-              accept="image/*"
-              style="display: none">
+            <input type="file" #fileInput1 (change)="onImageSelect($event)" accept="image/*" style="display: none">
             <button type="button" class="btn-upload" (click)="fileInput1.click()">
               <i class="fas fa-cloud-upload-alt"></i> Choose Image
             </button>
@@ -222,11 +206,7 @@
           </div>
 
           <div class="image-url-container" *ngIf="imageUploadMode === 'url'">
-            <input 
-              type="url" 
-              [(ngModel)]="imageUrlInput" 
-              name="imageUrl"
-              placeholder="https://example.com/image.jpg"
+            <input type="url" [(ngModel)]="imageUrlInput" name="imageUrl" placeholder="https://example.com/image.jpg"
               class="url-input">
             <button type="button" class="btn-url" (click)="onImageUrlInput()">
               <i class="fas fa-download"></i> Use URL
@@ -243,18 +223,22 @@
           </button>
         </div>
         <div class="image-instructions">
-          <i class="fas fa-check-circle"></i>          <p><strong>Image Ready!</strong> The image will be saved with the product data.</p>          <p class="hint">No manual file copy needed - image is stored automatically!</p>
+          <i class="fas fa-check-circle"></i>
+          <p><strong>Image Ready!</strong> The image will be saved with the product data.</p>
+          <p class="hint">No manual file copy needed - image is stored automatically!</p>
         </div>
       </div>
 
       <div class="form-group">
         <label>Description</label>
-        <textarea [(ngModel)]="productForm.description" name="description" rows="3" placeholder="Short description for product listing"></textarea>
+        <textarea [(ngModel)]="productForm.description" name="description" rows="3"
+          placeholder="Short description for product listing"></textarea>
       </div>
 
       <div class="form-group">
         <label>About Product (Detailed)</label>
-        <textarea [(ngModel)]="productForm.aboutProduct" name="aboutProduct" rows="5" placeholder="Detailed product information, features, specifications"></textarea>
+        <textarea [(ngModel)]="productForm.aboutProduct" name="aboutProduct" rows="5"
+          placeholder="Detailed product information, features, specifications"></textarea>
       </div>
 
       <div class="form-checkboxes">
@@ -316,7 +300,8 @@
       <div class="form-row">
         <div class="form-group">
           <label>Category *</label>
-          <select [(ngModel)]="productForm.category" name="category" required (ngModelChange)="productForm.subcategory = ''">
+          <select [(ngModel)]="productForm.category" name="category" required
+            (ngModelChange)="productForm.subcategory = ''">
             <option value="">Select Category</option>
             <option *ngFor="let category of categories" [value]="category.slug">
               {{ category.name }}
@@ -350,31 +335,20 @@
 
         <div class="form-group">
           <label>Product Image *</label>
-          
+
           <div class="image-mode-toggle">
-            <button 
-              type="button" 
-              class="mode-btn" 
-              [class.active]="imageUploadMode === 'file'"
+            <button type="button" class="mode-btn" [class.active]="imageUploadMode === 'file'"
               (click)="switchImageMode('file')">
               <i class="fas fa-upload"></i> Upload File
             </button>
-            <button 
-              type="button" 
-              class="mode-btn" 
-              [class.active]="imageUploadMode === 'url'"
+            <button type="button" class="mode-btn" [class.active]="imageUploadMode === 'url'"
               (click)="switchImageMode('url')">
               <i class="fas fa-link"></i> Image URL
             </button>
           </div>
 
           <div class="image-upload-container" *ngIf="imageUploadMode === 'file'">
-            <input 
-              type="file" 
-              #fileInput2
-              (change)="onImageSelect($event)" 
-              accept="image/*"
-              style="display: none">
+            <input type="file" #fileInput2 (change)="onImageSelect($event)" accept="image/*" style="display: none">
             <button type="button" class="btn-upload" (click)="fileInput2.click()">
               <i class="fas fa-cloud-upload-alt"></i> Choose Image
             </button>
@@ -382,11 +356,7 @@
           </div>
 
           <div class="image-url-container" *ngIf="imageUploadMode === 'url'">
-            <input 
-              type="url" 
-              [(ngModel)]="imageUrlInput" 
-              name="imageUrl2"
-              placeholder="https://example.com/image.jpg"
+            <input type="url" [(ngModel)]="imageUrlInput" name="imageUrl2" placeholder="https://example.com/image.jpg"
               class="url-input">
             <button type="button" class="btn-url" (click)="onImageUrlInput()">
               <i class="fas fa-download"></i> Use URL
@@ -403,18 +373,22 @@
           </button>
         </div>
         <div class="image-instructions">
-          <i class="fas fa-check-circle"></i>          <p><strong>Image Ready!</strong> The image will be saved with the product data.</p>          <p class="hint">No manual file copy needed - image is stored automatically!</p>
+          <i class="fas fa-check-circle"></i>
+          <p><strong>Image Ready!</strong> The image will be saved with the product data.</p>
+          <p class="hint">No manual file copy needed - image is stored automatically!</p>
         </div>
       </div>
 
       <div class="form-group">
         <label>Description</label>
-        <textarea [(ngModel)]="productForm.description" name="description" rows="3" placeholder="Short description for product listing"></textarea>
+        <textarea [(ngModel)]="productForm.description" name="description" rows="3"
+          placeholder="Short description for product listing"></textarea>
       </div>
 
       <div class="form-group">
         <label>About Product (Detailed)</label>
-        <textarea [(ngModel)]="productForm.aboutProduct" name="aboutProduct" rows="5" placeholder="Detailed product information, features, specifications"></textarea>
+        <textarea [(ngModel)]="productForm.aboutProduct" name="aboutProduct" rows="5"
+          placeholder="Detailed product information, features, specifications"></textarea>
       </div>
 
       <div class="form-checkboxes">
@@ -437,4 +411,3 @@
     </form>
   </div>
 </div>
-

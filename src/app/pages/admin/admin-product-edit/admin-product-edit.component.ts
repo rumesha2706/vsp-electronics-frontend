@@ -18,6 +18,7 @@ interface Product {
   image?: string;
   images?: string[];
   in_stock?: boolean;
+  stock_count?: number;
   is_hot?: boolean;
   is_new?: boolean;
   is_featured?: boolean;
@@ -66,6 +67,7 @@ export class AdminProductEditComponent implements OnInit {
     image: '',
     images: [],
     in_stock: true,
+    stock_count: 0,
     is_hot: false,
     is_new: false,
     is_featured: false,
@@ -286,6 +288,7 @@ export class AdminProductEditComponent implements OnInit {
         price: this.product.price,
         image: this.product.images?.[0] || this.product.image, // Use first image as main
         in_stock: this.product.in_stock,
+        stock_count: this.product.stock_count,
         is_hot: this.product.is_hot,
         is_new: this.product.is_new,
         is_featured: this.product.is_featured,
@@ -360,5 +363,14 @@ export class AdminProductEditComponent implements OnInit {
       .replace(/[^\w\-]+/g, '')
       .replace(/\-\-+/g, '-')
       .replace(/^-+|-+$/g, '');
+  }
+
+  onStockCountChange() {
+    if (this.product.stock_count === 0) {
+      this.product.in_stock = false;
+    } else if (this.product.stock_count && this.product.stock_count > 0) {
+      // Optional: Auto-check in_stock if count > 0?
+      // For now let's just safe guard the 0 case
+    }
   }
 }

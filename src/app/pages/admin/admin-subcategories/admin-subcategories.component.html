@@ -4,7 +4,7 @@
       <button class="back-button" (click)="goBack()">← Back</button>
       <h1><i class="fas fa-sitemap"></i> Manage Subcategories</h1>
     </div>
-    <button class="btn btn-primary" (click)="openForm()" *ngIf="!showForm">
+    <button class="btn btn-primary" (click)="openForm()">
       <i class="fas fa-plus"></i> Add New Subcategory
     </button>
   </div>
@@ -13,59 +13,61 @@
   <div class="alert alert-success" *ngIf="success">{{ success }}</div>
   <div class="alert alert-error" *ngIf="error">{{ error }}</div>
 
-  <!-- Form -->
-  <div class="form-section" *ngIf="showForm">
-    <div class="form-container">
-      <h2>{{ editingId ? 'Edit' : 'Add New' }} Subcategory</h2>
-      
-      <div class="form-group">
-        <label>Category *</label>
-        <select [(ngModel)]="formData.category_id" required>
-          <option value="0" disabled>Select a category</option>
-          <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
-        </select>
-      </div>
+  <!-- Form Modal -->
+  <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+    <div class="form-section" (click)="$event.stopPropagation()">
+      <div class="form-container">
+        <h2>{{ editingId ? 'Edit' : 'Add New' }} Subcategory</h2>
 
-      <div class="form-group">
-        <label>Subcategory Name *</label>
-        <input type="text" [(ngModel)]="formData.name" placeholder="Enter subcategory name" />
-      </div>
+        <div class="form-group">
+          <label>Category *</label>
+          <select [(ngModel)]="formData.category_id" required>
+            <option value="0" disabled>Select a category</option>
+            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label>Description</label>
-        <textarea [(ngModel)]="formData.description" placeholder="Enter description"></textarea>
-      </div>
+        <div class="form-group">
+          <label>Subcategory Name *</label>
+          <input type="text" [(ngModel)]="formData.name" placeholder="Enter subcategory name" />
+        </div>
 
-      <div class="form-group">
-        <label>Display Order</label>
-        <input type="number" [(ngModel)]="formData.display_order" />
-      </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="formData.description" placeholder="Enter description"></textarea>
+        </div>
 
-      <div class="form-group">
-        <label>Subcategory Image</label>
-        <input type="file" (change)="onFileSelected($event)" accept="image/*" />
-        <small>Select an image file to upload</small>
-      </div>
+        <div class="form-group">
+          <label>Display Order</label>
+          <input type="number" [(ngModel)]="formData.display_order" />
+        </div>
 
-      <div class="form-actions">
-        <button class="btn btn-success" (click)="saveSubcategory()" [disabled]="loading">
-          {{ loading ? 'Saving...' : 'Save Subcategory' }}
-        </button>
-        <button class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+        <div class="form-group">
+          <label>Subcategory Image</label>
+          <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+          <small>Select an image file to upload</small>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-success" (click)="saveSubcategory()" [disabled]="loading">
+            {{ loading ? 'Saving...' : 'Save Subcategory' }}
+          </button>
+          <button class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Subcategories List -->
-  <div class="subcategories-section">
+  <!-- Subcategories List (Show only if no subcategory selected) -->
+  <div class="subcategories-section" *ngIf="!selectedSubcategory">
     <div *ngIf="loading && subcategories.length === 0" class="loading">Loading subcategories...</div>
-    
+
     <div class="subcategories-grid" *ngIf="subcategories.length > 0">
-      <div class="subcat-card" *ngFor="let subcat of subcategories">
+      <div class="subcat-card" *ngFor="let subcat of subcategories" (click)="viewSubcategoryProducts(subcat)"
+        style="cursor: pointer;">
         <div class="card-image">
-          <img [src]="subcat.image_url || '/assets/images/placeholder.jpg'" 
-               [alt]="subcat.name"
-               (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
+          <img [src]="subcat.image_url || '/assets/images/placeholder.jpg'" [alt]="subcat.name"
+            (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
         </div>
         <div class="card-content">
           <h3>{{ subcat.name }}</h3>
@@ -73,7 +75,7 @@
           <p class="description">{{ subcat.description }}</p>
           <p class="meta">Order: {{ subcat.display_order }}</p>
         </div>
-        <div class="card-actions">
+        <div class="card-actions" (click)="$event.stopPropagation()">
           <button class="btn btn-sm btn-info" (click)="openForm(subcat)">
             <i class="fas fa-edit"></i> Edit
           </button>
@@ -86,6 +88,84 @@
 
     <div class="no-data" *ngIf="!loading && subcategories.length === 0">
       No subcategories found. <a (click)="openForm()" class="link">Create one now</a>
+    </div>
+  </div>
+
+  <!-- Products List (Show if subcategory selected) -->
+  <div class="products-section" *ngIf="selectedSubcategory">
+    <div class="section-header"
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="margin: 0;">
+        Products in {{ selectedSubcategory.name }}
+        <button class="btn btn-sm btn-secondary" (click)="closeSubcategoryProducts()" style="margin-left: 15px;">
+          <i class="fas fa-times"></i> Clear Filter
+        </button>
+      </h2>
+      <button class="btn btn-primary" (click)="openProductModal()">
+        <i class="fas fa-plus"></i> Add Product
+      </button>
+    </div>
+
+    <div class="subcategories-grid" *ngIf="products.length > 0">
+      <div class="subcat-card" *ngFor="let product of products">
+        <div class="card-image">
+          <img [src]="product.image || 'assets/images/placeholder.jpg'" [alt]="product.name">
+        </div>
+        <div class="card-content">
+          <h3>{{ product.name }}</h3>
+          <div class="description">Price: ₹{{ product.price }}</div>
+          <div class="meta" *ngIf="!product.inStock" style="color: red;">Out of Stock</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-info" (click)="openProductModal(product)">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-data" *ngIf="products.length === 0">
+      No products found in this subcategory. <a (click)="openProductModal()" class="link">Add one now</a>
+    </div>
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" *ngIf="showProductModal">
+    <div class="form-section">
+      <h2>{{ selectedProduct ? 'Edit' : 'Add' }} Product</h2>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="productForm.name">
+      </div>
+      <div class="form-group">
+        <label>Price</label>
+        <input type="number" [(ngModel)]="productForm.price">
+      </div>
+      <div class="form-group">
+        <label>Image URL</label>
+        <input type="text" [(ngModel)]="productForm.image">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="productForm.description"></textarea>
+      </div>
+      <div class="form-group">
+        <label>In Stock</label>
+        <input type="checkbox" [(ngModel)]="productForm.inStock">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <input type="text" [(ngModel)]="productForm.category" readonly disabled style="background-color: #eee;">
+        <small>Category is automatically set based on subcategory.</small>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-success" (click)="saveProduct()">Save</button>
+        <button class="btn btn-secondary" (click)="closeProductModal()">Cancel</button>
+      </div>
     </div>
   </div>
 </div>

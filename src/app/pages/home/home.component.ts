@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../services/product.service';
@@ -69,7 +70,7 @@ export class HomeComponent implements OnInit {
     this.error = '';
 
     // Fetch all home data from API
-    this.http.get<any>('/api/home/all').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/home/all`).subscribe({
       next: (response) => {
         // Process featured categories
         if (response.categories && Array.isArray(response.categories)) {

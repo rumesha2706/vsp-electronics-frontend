@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { BackendProductService } from '../../../services/backend-product.service';
 import { environment } from '../../../../environments/environment';
 
 interface Brand {
@@ -68,7 +69,11 @@ export class AdminBrandsComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/admin']);
+    if (this.selectedBrand) {
+      this.closeBrandProducts();
+    } else {
+      this.router.navigate(['/admin']);
+    }
   }
 
   loadBrands() {
@@ -168,7 +173,7 @@ export class AdminBrandsComponent implements OnInit {
 
       const method = this.editingId ? 'PUT' : 'POST';
 
-      this.http.request(method, url, { 
+      this.http.request(method, url, {
         body: payload,
         headers: this.getAuthHeaders()
       })
@@ -196,7 +201,7 @@ export class AdminBrandsComponent implements OnInit {
     }
 
     this.loading = true;
-    this.http.delete(`${this.apiUrl}/brands/${id}`, { 
+    this.http.delete(`${this.apiUrl}/brands/${id}`, {
       headers: this.getAuthHeaders()
     })
       .subscribe(
@@ -222,7 +227,7 @@ export class AdminBrandsComponent implements OnInit {
             `${this.apiUrl}/upload/image`,
             { base64Data: base64Data, type: 'brand' }
           ).toPromise();
-          
+
           resolve(response?.imageUrl || base64Data);
         } catch (err) {
           reject(err);
@@ -232,6 +237,95 @@ export class AdminBrandsComponent implements OnInit {
     });
   }
 
+  // Products State
+  products: any[] = [];
+  selectedBrand: Brand | null = null;
+  showProductModal = false;
+  selectedProduct: any | null = null;
+  productForm: any = {};
+
+  // Inject BackendProductService properly
+  private backendService = inject(BackendProductService);
+
+  // ... (previous methods)
+
+  // --- Brand Product View Logic ---
+
+  viewBrandProducts(brand: Brand) {
+    this.selectedBrand = brand;
+    this.loadProducts(brand.name);
+  }
+
+  closeBrandProducts() {
+    this.selectedBrand = null;
+    this.products = [];
+  }
+
+  loadProducts(brandName: string) {
+    this.loading = true;
+    this.backendService.getProducts({ brand: brandName, limit: 1000 }).subscribe({
+      next: (res) => {
+        this.products = res.data || [];
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading products:', err);
+        this.error = 'Failed to load products';
+        this.loading = false;
+      }
+    });
+  }
+
+  // --- Product CRUD (Copied from AdminCategoryDetails for consistency) ---
+
+  openProductModal(product?: any) {
+    if (product) {
+      this.selectedProduct = product;
+      this.productForm = { ...product };
+    } else {
+      this.selectedProduct = null;
+      this.productForm = {
+        name: '',
+        brand: this.selectedBrand?.name || '', // Pre-fill brand
+        price: 0,
+        image: '',
+        description: '',
+        inStock: true,
+        category: '' // Category is required but we don't have strictly one category here. User must select.
+      };
+    }
+    this.showProductModal = true;
+  }
+
+  closeProductModal() {
+    this.showProductModal = false;
+  }
+
+  saveProduct() {
+    if (!this.productForm.name || !this.productForm.price) return;
+
+    const payload: any = { ...this.productForm };
+
+    if (this.selectedProduct) {
+      this.backendService.updateProduct(this.selectedProduct.id, payload).subscribe(() => {
+        if (this.selectedBrand) this.loadProducts(this.selectedBrand.name);
+        this.closeProductModal();
+      });
+    } else {
+      this.backendService.createProduct(payload).subscribe(() => {
+        if (this.selectedBrand) this.loadProducts(this.selectedBrand.name);
+        this.closeProductModal();
+      });
+    }
+  }
+
+  deleteProduct(product: any) {
+    if (confirm('Delete this product?')) {
+      this.backendService.deleteProduct(product.id).subscribe(() => {
+        if (this.selectedBrand) this.loadProducts(this.selectedBrand.name);
+      });
+    }
+  }
   slugify(text: string): string {
     return text
       .toLowerCase()
