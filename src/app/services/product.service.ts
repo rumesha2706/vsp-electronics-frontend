@@ -17,7 +17,7 @@ export class ProductService {
     // Clear old cached categories that might have subcategories
     localStorage.removeItem('drone_shop_products');
     localStorage.removeItem('drone_shop_categories');
-    
+
     // Load products from localStorage if available
     const savedProducts = localStorage.getItem('drone_shop_products');
     if (savedProducts) {
@@ -53,59 +53,59 @@ export class ProductService {
   private categories = signal<Category[]>([
     { id: '1', name: '3D printers parts', slug: '3d-printers-parts', image: 'assets/images/categories/3d-printers.jpg', productCount: 46 },
     { id: '2', name: 'AC MOTOR', slug: 'ac-motor', image: 'assets/images/categories/ac-motor.jpg', productCount: 2 },
-    { 
-      id: '3', 
-      name: 'Accessories', 
-      slug: 'accessories', 
-      image: 'assets/images/categories/accessories.jpg', 
+    {
+      id: '3',
+      name: 'Accessories',
+      slug: 'accessories',
+      image: 'assets/images/categories/accessories.jpg',
       productCount: 169,
       subcategories: [
-        { 
-          id: '3-1', 
-          name: 'Connectors', 
-          slug: 'connectors', 
+        {
+          id: '3-1',
+          name: 'Connectors',
+          slug: 'connectors',
           productCount: 18,
           image: '/assets/images/products/amass-xt90-male-female-connector.jpg'
         },
-        { 
-          id: '3-2', 
-          name: 'DIP Converters', 
-          slug: 'dip-converters', 
+        {
+          id: '3-2',
+          name: 'DIP Converters',
+          slug: 'dip-converters',
           productCount: 3,
           image: '/assets/images/products/type-c-to-dip-converter.jpg'
         },
-        { 
-          id: '3-3', 
-          name: 'IOT', 
-          slug: 'iot', 
+        {
+          id: '3-3',
+          name: 'IOT',
+          slug: 'iot',
           productCount: 2,
           image: '/assets/images/products/arduino-uno-kit-akx00037.jpg'
         },
-        { 
-          id: '3-4', 
-          name: 'Keypad', 
-          slug: 'keypad', 
+        {
+          id: '3-4',
+          name: 'Keypad',
+          slug: 'keypad',
           productCount: 6,
           image: '/assets/images/products/4x4-matrix-membrane-keypad.jpg'
         },
-        { 
-          id: '3-5', 
-          name: 'Silicone Wires', 
-          slug: 'silicone-wires', 
+        {
+          id: '3-5',
+          name: 'Silicone Wires',
+          slug: 'silicone-wires',
           productCount: 18,
           image: '/assets/images/products/16-awg-silicone-wire-red.jpg'
         },
-        { 
-          id: '3-6', 
-          name: 'Twezzers', 
-          slug: 'twezzers', 
+        {
+          id: '3-6',
+          name: 'Twezzers',
+          slug: 'twezzers',
           productCount: 5,
           image: '/assets/images/products/anti-static-tweezers-6pcs-set.jpg'
         },
-        { 
-          id: '3-7', 
-          name: 'USB Cables', 
-          slug: 'usb', 
+        {
+          id: '3-7',
+          name: 'USB Cables',
+          slug: 'usb',
           productCount: 1,
           image: '/assets/images/products/cable-for-arduino-uno-mega-usb-a-to-b.jpg'
         }
@@ -114,38 +114,38 @@ export class ProductService {
     { id: '4', name: 'Agriculture Drone Parts', slug: 'agriculture-drone-parts', image: 'assets/images/categories/agriculture-drone-parts.jpg', productCount: 31 },
     { id: '5', name: 'ANTENNA', slug: 'antenna', image: 'assets/images/categories/antenna.jpg', productCount: 69 },
     { id: '6', name: 'Audio Jack', slug: 'audio-jack', image: 'assets/images/categories/audio-jack.jpg', productCount: 24 },
-    { 
-      id: '7', 
-      name: 'BATTERY', 
-      slug: 'battery', 
-      image: 'assets/images/categories/battery.jpg', 
+    {
+      id: '7',
+      name: 'BATTERY',
+      slug: 'battery',
+      image: 'assets/images/categories/battery.jpg',
       productCount: 41,
       subcategories: [
-        { 
-          id: '7-1', 
-          name: 'Battery Holders', 
-          slug: 'battery-holders', 
+        {
+          id: '7-1',
+          name: 'Battery Holders',
+          slug: 'battery-holders',
           productCount: 5,
           image: '/assets/images/products/placeholder.jpg'
         },
-        { 
-          id: '7-2', 
-          name: 'Battery Chargers', 
-          slug: 'battery-chargers', 
+        {
+          id: '7-2',
+          name: 'Battery Chargers',
+          slug: 'battery-chargers',
           productCount: 8,
           image: '/assets/images/products/placeholder.jpg'
         },
-        { 
-          id: '7-3', 
-          name: 'LiPo Batteries', 
-          slug: 'lipo-batteries', 
+        {
+          id: '7-3',
+          name: 'LiPo Batteries',
+          slug: 'lipo-batteries',
           productCount: 15,
           image: '/assets/images/products/placeholder.jpg'
         },
-        { 
-          id: '7-4', 
-          name: 'Battery Connectors', 
-          slug: 'battery-connectors', 
+        {
+          id: '7-4',
+          name: 'Battery Connectors',
+          slug: 'battery-connectors',
           productCount: 5,
           image: '/assets/images/products/placeholder.jpg'
         }
@@ -153,17 +153,17 @@ export class ProductService {
     },
     { id: '8', name: 'ROBOTIC DIY KITS', slug: 'robotic-diy-kits', image: 'assets/images/categories/robotic-kits.jpg', productCount: 14 },
     { id: '9', name: 'READY RUNNING PROJECTS', slug: 'ready-running-projects', image: 'assets/images/categories/ready-running-projects.jpg', productCount: 19 },
-    { 
-      id: '10', 
-      name: 'Raspberry Pi Boards', 
-      slug: 'raspberry', 
-      image: 'assets/images/categories/raspberry.jpg', 
+    {
+      id: '10',
+      name: 'Raspberry Pi Boards',
+      slug: 'raspberry',
+      image: 'assets/images/categories/raspberry.jpg',
       productCount: 12,
       subcategories: [
-        { 
-          id: '10-1', 
-          name: 'RPI Accessories', 
-          slug: 'raspberry/rpi-accessories', 
+        {
+          id: '10-1',
+          name: 'RPI Accessories',
+          slug: 'raspberry/rpi-accessories',
           productCount: 50,
           image: '/assets/images/products/placeholder.jpg'
         }
@@ -171,52 +171,52 @@ export class ProductService {
     },
     { id: '11', name: 'MINI DRONE KITS ( BELOW 20CMS )', slug: 'mini-drone-kits', image: 'assets/images/categories/mini-drone-kits.jpg', productCount: 3 },
     { id: '12', name: 'DRONE TRANSMITER AND RECEIVER', slug: 'drone-transmiter-receiver', image: 'assets/images/categories/drone-transmiter.jpg', productCount: 16 },
-    { 
-      id: '13', 
-      name: 'DIY KITS', 
-      slug: 'diy-kits', 
-      image: 'assets/images/categories/diy-kits.jpg', 
+    {
+      id: '13',
+      name: 'DIY KITS',
+      slug: 'diy-kits',
+      image: 'assets/images/categories/diy-kits.jpg',
       productCount: 105,
       subcategories: [
-        { 
-          id: '13-1', 
-          name: 'ACEBOTT', 
-          slug: 'acebott-kits', 
+        {
+          id: '13-1',
+          name: 'ACEBOTT',
+          slug: 'acebott-kits',
           productCount: 14,
           image: '/assets/images/products/3in1-acebott-esp32-smart-home-lv1.jpg'
         },
-        { 
-          id: '13-2', 
-          name: 'AM ROBOTICS', 
-          slug: 'am-robotics-kits', 
+        {
+          id: '13-2',
+          name: 'AM ROBOTICS',
+          slug: 'am-robotics-kits',
           productCount: 26,
           image: '/assets/images/products/placeholder.jpg'
         },
-        { 
-          id: '13-3', 
-          name: 'dbolo Kits', 
-          slug: 'dbolo-kits', 
+        {
+          id: '13-3',
+          name: 'dbolo Kits',
+          slug: 'dbolo-kits',
           productCount: 4,
           image: '/assets/images/products/placeholder.jpg'
         },
-        { 
-          id: '13-4', 
-          name: 'JSB DIY KITS', 
-          slug: 'jsb-diy-kits', 
+        {
+          id: '13-4',
+          name: 'JSB DIY KITS',
+          slug: 'jsb-diy-kits',
           productCount: 15,
           image: '/assets/images/products/placeholder.jpg'
         },
-        { 
-          id: '13-5', 
-          name: 'ROBOTIC DIY KITS', 
-          slug: 'robotic-diy-kits', 
+        {
+          id: '13-5',
+          name: 'ROBOTIC DIY KITS',
+          slug: 'robotic-diy-kits',
           productCount: 14,
           image: 'assets/images/categories/robotic-kits.jpg'
         },
-        { 
-          id: '13-6', 
-          name: 'MINI DRONE KITS ( BELOW 20CMS )', 
-          slug: 'mini-drone-kits', 
+        {
+          id: '13-6',
+          name: 'MINI DRONE KITS ( BELOW 20CMS )',
+          slug: 'mini-drone-kits',
           productCount: 3,
           image: 'assets/images/categories/mini-drone-kits.jpg'
         }
@@ -243,7 +243,8 @@ export class ProductService {
     { id: '11', name: 'Raspberry Pi', slug: 'raspberry-pi', image: 'assets/images/brands/pi.jpg' },
     { id: '12', name: 'SKYDROID', slug: 'skydroid', image: 'assets/images/brands/SKydroid.jpg' },
     { id: '13', name: 'SKYRC', slug: 'skyrc', image: 'assets/images/brands/SKYRC.png' },
-    { id: '14', name: 'TATTU', slug: 'tattu', image: 'assets/images/brands/TATTU.jpg' }
+    { id: '14', name: 'TATTU', slug: 'tattu', image: 'assets/images/brands/TATTU.jpg' },
+    { id: '15', name: 'ACEBOTT', slug: 'acebott-1', image: '/assets/images/brand/1768025211900-5433.jpeg' }
   ]);
 
   getProducts() {
@@ -260,51 +261,51 @@ export class ProductService {
       const parts = category.split('/');
       const mainCategory = parts[0];
       const subCategory = parts.slice(1).join('/');
-      
+
       // Normalize for comparison
       const normalizedMainCategory = mainCategory.toLowerCase().replace(/-/g, ' ');
       const normalizedSubCategory = subCategory.toLowerCase().replace(/-/g, ' ');
-      
+
       // Strip common suffixes like "kits" from the subcategory slug to match category/brand names
       let matchedSubCategory = normalizedSubCategory;
       if (matchedSubCategory.endsWith(' kits')) {
         matchedSubCategory = matchedSubCategory.replace(/ kits$/, '');
       }
-      
+
       return this.products().filter((p: Product) => {
         const productCategory = p.category.toLowerCase().replace(/-/g, ' ');
         const productSubCategory = (p.subcategory || '').toLowerCase().replace(/-/g, ' ');
         const productBrand = p.brand.toLowerCase().replace(/-/g, ' ');
-        
+
         // First, check if product's category matches the subcategory (for categories like "Robotic DIY Kits")
         const categoryMatchesSubCategory = productCategory === matchedSubCategory ||
-                                          productCategory === normalizedSubCategory ||
-                                          productCategory.includes(matchedSubCategory) ||
-                                          productCategory.includes(normalizedSubCategory);
-        
+          productCategory === normalizedSubCategory ||
+          productCategory.includes(matchedSubCategory) ||
+          productCategory.includes(normalizedSubCategory);
+
         if (categoryMatchesSubCategory) {
           return true;
         }
-        
+
         // Otherwise, check if product is in the main category (e.g., DIY Kits)
         const isMainCategoryMatch = productCategory.includes(normalizedMainCategory);
-        
+
         if (isMainCategoryMatch) {
           // If main category matches, check if brand or subcategory also matches
           return productBrand === normalizedSubCategory ||
-                 productBrand === matchedSubCategory ||
-                 productBrand.includes(matchedSubCategory) ||
-                 productSubCategory === normalizedSubCategory ||
-                 productSubCategory.includes(normalizedSubCategory);
+            productBrand === matchedSubCategory ||
+            productBrand.includes(matchedSubCategory) ||
+            productSubCategory === normalizedSubCategory ||
+            productSubCategory.includes(normalizedSubCategory);
         }
-        
+
         return false;
       });
     }
-    
+
     // Convert slug to match category name format
     const normalizedCategory = category.toLowerCase().replace(/-/g, ' ');
-    return this.products().filter((p: Product) => 
+    return this.products().filter((p: Product) =>
       p.category.toLowerCase().replace(/-/g, ' ').includes(normalizedCategory)
     );
   }
@@ -319,7 +320,7 @@ export class ProductService {
       const parts = slug.split('/');
       const mainCategorySlug = parts[0];
       const subCategorySlug = parts.slice(1).join('/');
-      
+
       const mainCategory = this.categories().find(cat => cat.slug === mainCategorySlug);
       if (mainCategory && mainCategory.subcategories) {
         // sub.slug might be stored as 'acebott-kits' or as a full path; check both formats

@@ -202,4 +202,7 @@ export class BackendProductService {
       })
     );
   }
+  updateCategory(id: string, category: any): Observable<any> {
+    return this.http.put<any>(`${environment.apiUrl}/categories/${id}`, category);
+  }
 }

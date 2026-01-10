@@ -19,8 +19,11 @@
   <div class="breadcrumb">
     <div class="container">
       <a routerLink="/">Home</a> /
-      <a [routerLink]="['/category', getCategorySlug()]">{{ product.category }}</a> /
-      <span>{{ product.name }}</span>
+      <a routerLink="/all-categories">Product Categories</a> /
+      <a [routerLink]="['/category', getCategorySlug()]">{{ product.category }}</a>
+      <span *ngIf="product.subcategory"> / {{ product.subcategory }}</span>
+      <span *ngIf="product.brand && product.brand !== 'Generic'"> / {{ product.brand }}</span> /
+      <span class="current">{{ product.name }}</span>
     </div>
   </div>
 

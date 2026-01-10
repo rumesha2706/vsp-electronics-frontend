@@ -74,8 +74,10 @@
   <div class="brands-section" *ngIf="!selectedBrand">
     <div *ngIf="loading && brands.length === 0" class="loading">Loading brands...</div>
 
-    <div class="brands-grid" *ngIf="brands.length > 0">
-      <div class="brand-card" *ngFor="let brand of brands" (click)="viewBrandProducts(brand)" style="cursor: pointer;">
+    <div class="brands-grid" *ngIf="brands.length > 0" cdkDropList cdkDropListOrientation="horizontal"
+      (cdkDropListDropped)="onDrop($event)">
+      <div class="brand-card" *ngFor="let brand of brands" (click)="viewBrandProducts(brand)" style="cursor: pointer;"
+        cdkDrag>
         <div class="card-logo">
           <img [src]="brand.image || brand.logo_url || '/assets/images/placeholder.jpg'" [alt]="brand.name"
             (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
@@ -120,7 +122,7 @@
     </div>
 
     <div class="brands-grid" *ngIf="products.length > 0">
-      <div class="brand-card" *ngFor="let product of products">
+      <div class="brand-card" *ngFor="let product of products" (click)="viewProduct(product)" style="cursor: pointer;">
         <div class="card-logo">
           <img [src]="product.image || 'assets/images/placeholder.jpg'" [alt]="product.name">
         </div>

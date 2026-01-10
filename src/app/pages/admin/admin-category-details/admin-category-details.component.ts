@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BackendProductService } from '../../../services/backend-product.service';
 import { SubcategoryService } from '../../../services/subcategory.service';
 import { Product } from '../../../models/product.model';
+import { UploadService } from '../../../services/upload.service';
 
 @Component({
     selector: 'app-admin-category-details',
@@ -19,6 +20,7 @@ export class AdminCategoryDetailsComponent implements OnInit {
     private location = inject(Location);
     private backendService = inject(BackendProductService);
     private subcategoryService = inject(SubcategoryService);
+    private uploadService = inject(UploadService);
 
     categorySlug = '';
     category: any = null;
@@ -32,6 +34,7 @@ export class AdminCategoryDetailsComponent implements OnInit {
     // Modal states
     showProductModal = false;
     showSubcategoryModal = false;
+    showCategoryModal = false;
 
     selectedProduct: Product | null = null;
     selectedSubcategory: any | null = null;
@@ -39,6 +42,7 @@ export class AdminCategoryDetailsComponent implements OnInit {
     // Forms
     productForm: Partial<Product> = {};
     subcategoryForm: any = {};
+    categoryForm: any = {};
 
     ngOnInit() {
         this.route.params.subscribe(params => {
@@ -189,9 +193,29 @@ export class AdminCategoryDetailsComponent implements OnInit {
             this.subcategoryForm = { ...sub };
         } else {
             this.selectedSubcategory = null;
-            this.subcategoryForm = { name: '' };
+            this.subcategoryForm = { name: '', image_url: '' };
         }
         this.showSubcategoryModal = true;
+    }
+
+    async onSubcategoryFileSelected(event: any) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const base64 = await this.uploadService.fileToBase64(file);
+            this.uploadService.uploadImage({
+                base64Data: base64,
+                type: 'subcategory'
+            }).subscribe({
+                next: (res) => {
+                    this.subcategoryForm.image_url = res.imageUrl; // Store the returned URL
+                },
+                error: (err) => console.error('Upload failed', err)
+            });
+        } catch (error) {
+            console.error('File reading failed', error);
+        }
     }
 
     saveSubcategory() {
@@ -200,7 +224,8 @@ export class AdminCategoryDetailsComponent implements OnInit {
         // Ensure category_id is set
         const payload = {
             ...this.subcategoryForm,
-            category_id: this.category.id
+            category_id: this.category.id,
+            imageUrl: this.subcategoryForm.image_url // Map to expected service param
         };
 
         if (this.selectedSubcategory) {
@@ -231,13 +256,55 @@ export class AdminCategoryDetailsComponent implements OnInit {
         }
     }
 
+    // Category Edit Actions
+    openCategoryEditModal() {
+        if (!this.category) return;
+        this.categoryForm = {
+            name: this.category.name,
+            description: this.category.description,
+            image_url: this.category.image_url,
+            display_order: this.category.display_order
+        };
+        this.showCategoryModal = true;
+    }
+
+    async onCategoryFileSelected(event: any) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const base64 = await this.uploadService.fileToBase64(file);
+            this.uploadService.uploadImage({
+                base64Data: base64,
+                type: 'category'
+            }).subscribe({
+                next: (res) => {
+                    this.categoryForm.image_url = res.imageUrl;
+                },
+                error: (err) => console.error('Upload failed', err)
+            });
+        } catch (error) {
+            console.error('File reading failed', error);
+        }
+    }
+
+    saveCategory() {
+        if (!this.categoryForm.name) return;
+
+        const payload = { ...this.categoryForm };
+
+        this.backendService.updateCategory(this.category.id, payload).subscribe({
+            next: (updated) => {
+                this.category = updated;
+                this.showCategoryModal = false;
+            },
+            error: (err) => alert('Failed to update category')
+        });
+    }
+
     closeModals() {
         this.showProductModal = false;
         this.showSubcategoryModal = false;
-    }
-
-    // Placeholder for category edit
-    openCategoryEditModal() {
-        alert('Edit category feature coming soon (use main list for now)');
+        this.showCategoryModal = false;
     }
 }

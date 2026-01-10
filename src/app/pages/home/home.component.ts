@@ -150,7 +150,7 @@ export class HomeComponent implements OnInit {
 
     this.brands = this.productService.getBrands();
 
-    const brandSlugs = ['acebott', 'amass', 'arduino', 'bonka', 'eft', 'elcon', 'emax', 'hobbywing', 'jiyi', 'mastech', 'raspberry-pi', 'skydroid', 'skyrc', 'tattu'];
+    const brandSlugs = ['acebott', 'acebott-1', 'amass', 'arduino', 'bonka', 'eft', 'elcon', 'emax', 'hobbywing', 'jiyi', 'mastech', 'raspberry-pi', 'skydroid', 'skyrc', 'tattu'];
     this.featuredBrands = this.brands.filter(b => brandSlugs.includes(b.slug));
 
     this.updateDisplayedProducts();

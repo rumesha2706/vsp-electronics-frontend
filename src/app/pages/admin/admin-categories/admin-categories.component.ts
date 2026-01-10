@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 interface Category {
   id?: number;
@@ -18,7 +19,7 @@ interface Category {
 @Component({
   selector: 'app-admin-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DragDropModule],
   templateUrl: './admin-categories.component.html',
   styleUrls: ['./admin-categories.component.css']
 })
@@ -219,5 +220,31 @@ export class AdminCategoriesComponent implements OnInit {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
+  }
+
+  onDrop(event: CdkDragDrop<Category[]>) {
+    moveItemInArray(this.categories, event.previousIndex, event.currentIndex);
+    this.updateDisplayOrder();
+  }
+
+  updateDisplayOrder() {
+    // Show a small loading indicator if needed, or just let it happen in background
+    const updates = this.categories.map((cat, index) => {
+      const newOrder = index + 1;
+      // Only update if order changed
+      if (cat.display_order !== newOrder && cat.id) {
+        cat.display_order = newOrder;
+        return this.http.put(`${this.apiUrl}/categories/admin/${cat.id}`, { displayOrder: newOrder }).toPromise();
+      }
+      return Promise.resolve();
+    });
+
+    Promise.all(updates).then(() => {
+      console.log('Order updated successfully');
+      // Optional: Show success toast
+    }).catch(err => {
+      console.error('Failed to update order', err);
+      this.error = 'Failed to update order';
+    });
   }
 }

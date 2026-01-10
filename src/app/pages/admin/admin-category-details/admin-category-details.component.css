@@ -6,6 +6,7 @@
 }
 
 /* Header Section */
+/* Header Section */
 .header-hero {
     background: white;
     border-radius: 16px;
@@ -13,27 +14,36 @@
     margin-bottom: 32px;
     overflow: hidden;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    /* Changed from default column if it was flex, essentially side-by-side */
+    align-items: stretch;
+    min-height: 240px;
 }
 
 .hero-banner {
-    height: 240px;
+    width: 320px;
+    /* Fixed width */
     background-color: #f7fafc;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
+    border-right: 1px solid #edf2f7;
 }
 
 .hero-banner img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* Ensures image covers the area nicely */
 }
 
 .hero-content {
     padding: 32px;
+    flex: 1;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    /* Center vertically */
     gap: 24px;
 }
 
@@ -522,5 +532,17 @@
 @media (max-width: 768px) {
     .form-grid {
         grid-template-columns: 1fr;
+    }
+
+    .header-hero {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .hero-banner {
+        width: 100%;
+        height: 240px;
+        border-right: none;
+        border-bottom: 1px solid #edf2f7;
     }
 }

@@ -58,35 +58,42 @@
     </div>
   </div>
 
-  <!-- Subcategories List (Show only if no subcategory selected) -->
   <div class="subcategories-section" *ngIf="!selectedSubcategory">
-    <div *ngIf="loading && subcategories.length === 0" class="loading">Loading subcategories...</div>
+    <div *ngIf="loading && categoriesWithSubcategories.length === 0" class="loading">Loading subcategories...</div>
 
-    <div class="subcategories-grid" *ngIf="subcategories.length > 0">
-      <div class="subcat-card" *ngFor="let subcat of subcategories" (click)="viewSubcategoryProducts(subcat)"
-        style="cursor: pointer;">
-        <div class="card-image">
-          <img [src]="subcat.image_url || '/assets/images/placeholder.jpg'" [alt]="subcat.name"
-            (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
-        </div>
-        <div class="card-content">
-          <h3>{{ subcat.name }}</h3>
-          <p class="category-tag">{{ getCategoryName(subcat.category_id) }}</p>
-          <p class="description">{{ subcat.description }}</p>
-          <p class="meta">Order: {{ subcat.display_order }}</p>
-        </div>
-        <div class="card-actions" (click)="$event.stopPropagation()">
-          <button class="btn btn-sm btn-info" (click)="openForm(subcat)">
-            <i class="fas fa-edit"></i> Edit
-          </button>
-          <button class="btn btn-sm btn-danger" (click)="deleteSubcategory(subcat.id, subcat.category_id)">
-            <i class="fas fa-trash"></i> Delete
-          </button>
+    <div *ngFor="let cat of categoriesWithSubcategories">
+      <div *ngIf="cat.subcategories && cat.subcategories.length > 0">
+        <h3 style="margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+          {{ cat.name }} <span style="font-size: 14px; font-weight: normal; color: #666;">({{ cat.subcategories.length
+            }} subcategories)</span>
+        </h3>
+
+        <div class="subcategories-grid" cdkDropList (cdkDropListDropped)="onDrop($event, cat)">
+          <div class="subcat-card" *ngFor="let subcat of cat.subcategories" (click)="viewSubcategoryProducts(subcat)"
+            style="cursor: pointer;" cdkDrag>
+            <div class="card-image">
+              <img [src]="subcat.image_url || '/assets/images/placeholder.jpg'" [alt]="subcat.name"
+                (error)="$any($event.target).src='/assets/images/placeholder.jpg'" />
+            </div>
+            <div class="card-content">
+              <h3>{{ subcat.name }}</h3>
+              <p class="description">{{ subcat.description }}</p>
+              <p class="meta">Order: {{ subcat.display_order }}</p>
+            </div>
+            <div class="card-actions" (click)="$event.stopPropagation()">
+              <button class="btn btn-sm btn-info" (click)="openForm(subcat)">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="deleteSubcategory(subcat.id, subcat.category_id)">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="no-data" *ngIf="!loading && subcategories.length === 0">
+    <div class="no-data" *ngIf="!loading && (!categoriesWithSubcategories || categoriesWithSubcategories.length === 0)">
       No subcategories found. <a (click)="openForm()" class="link">Create one now</a>
     </div>
   </div>
@@ -107,7 +114,7 @@
     </div>
 
     <div class="subcategories-grid" *ngIf="products.length > 0">
-      <div class="subcat-card" *ngFor="let product of products">
+      <div class="subcat-card" *ngFor="let product of products" (click)="viewProduct(product)" style="cursor: pointer;">
         <div class="card-image">
           <img [src]="product.image || 'assets/images/placeholder.jpg'" [alt]="product.name">
         </div>

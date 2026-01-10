@@ -322,3 +322,34 @@
 .link:hover {
   color: #0056b3;
 }
+
+/* Drag and Drop Styles */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  background-color: white;
+  opacity: 0.9;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+  background: #eee;
+  border: 2px dashed #ccc;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.subcategories-grid.cdk-drop-list-dragging .subcat-card:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.subcat-card {
+  cursor: grab;
+}
+
+.subcat-card:active {
+  cursor: grabbing;
+}

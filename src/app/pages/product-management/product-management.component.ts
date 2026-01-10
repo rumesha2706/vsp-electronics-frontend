@@ -26,11 +26,11 @@ export class ProductManagementComponent implements OnInit {
   categories: Category[] = [];
   brands: any[] = [];
   filteredProducts: Product[] = [];
-  
+
   showAddModal = false;
   showEditModal = false;
   selectedProduct: Product | null = null;
-  
+
   // Form data
   productForm: Partial<Product> = {
     name: '',
@@ -68,10 +68,24 @@ export class ProductManagementComponent implements OnInit {
   }
 
   loadData() {
-    this.products = this.productService.getAllProducts();
-    this.categories = this.productService.getAllCategories();
-    this.brands = this.productService.getBrands();
-    this.filteredProducts = [...this.products];
+    this.backendService.getProducts({ limit: 1000 }).subscribe({
+      next: (response) => {
+        this.products = response.data || [];
+        this.filteredProducts = [...this.products];
+
+        // Extract unique brands from products
+        const uniqueBrands = [...new Set(this.products.map(p => p.brand).filter(b => !!b))].sort();
+        this.brands = uniqueBrands.map(name => ({ name }));
+      },
+      error: (err) => console.error('Error loading products', err)
+    });
+
+    this.backendService.getCategoriesWithDetails().subscribe({
+      next: (data) => {
+        this.categories = data || [];
+      },
+      error: (err) => console.error('Error loading categories', err)
+    });
   }
 
   goBack() {
@@ -79,16 +93,30 @@ export class ProductManagementComponent implements OnInit {
   }
 
   filterProducts() {
+    // Resolve category slug to name for comparison
+    let targetCategoryName = '';
+    if (this.selectedCategory) {
+      const categoryObj = this.categories.find(c => c.slug === this.selectedCategory);
+      targetCategoryName = categoryObj ? categoryObj.name.toLowerCase() : this.selectedCategory.toLowerCase();
+    }
+
     this.filteredProducts = this.products.filter(product => {
-      const matchesSearch = !this.searchTerm || 
-        product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        product.id.toString().includes(this.searchTerm);
-      
-      const matchesCategory = !this.selectedCategory || 
-        product.category.toLowerCase() === this.selectedCategory.toLowerCase();
-      
-      const matchesBrand = !this.selectedBrand || 
-        product.brand.toLowerCase() === this.selectedBrand.toLowerCase();
+      // Safe string conversions
+      const pName = (product.name || '').toLowerCase();
+      const pId = (product.id || '').toString();
+      const pCategory = (product.category || '').toLowerCase();
+      const pBrand = (product.brand || '').toLowerCase();
+
+      const searchLower = (this.searchTerm || '').toLowerCase();
+      const matchesSearch = !searchLower ||
+        pName.includes(searchLower) ||
+        pId.includes(searchLower);
+
+      const matchesCategory = !targetCategoryName ||
+        pCategory === targetCategoryName;
+
+      const matchesBrand = !this.selectedBrand ||
+        pBrand === this.selectedBrand.toLowerCase();
 
       return matchesSearch && matchesCategory && matchesBrand;
     });
@@ -125,16 +153,16 @@ export class ProductManagementComponent implements OnInit {
   openEditModal(product: Product) {
     this.selectedProduct = product;
     this.productForm = { ...product };
-    
+
     // Convert category display name to slug for dropdown
-    const categoryMatch = this.categories.find(c => 
+    const categoryMatch = this.categories.find(c =>
       c.name.toLowerCase() === product.category.toLowerCase() ||
       c.slug === product.category
     );
     if (categoryMatch) {
       this.productForm.category = categoryMatch.slug;
     }
-    
+
     // Set image preview if product has an image
     if (product.image) {
       this.imagePreview = product.image;
@@ -146,7 +174,7 @@ export class ProductManagementComponent implements OnInit {
         this.imageUploadMode = 'url';
       }
     }
-    
+
     this.showEditModal = true;
     this.errorMessage = '';
     this.successMessage = '';
@@ -175,7 +203,7 @@ export class ProductManagementComponent implements OnInit {
       // Convert category slug to category name
       const categoryObj = this.categories.find(c => c.slug === this.productForm.category);
       const categoryName = categoryObj ? categoryObj.name : (this.productForm.category || '');
-      
+
       // Generate new product ID
       const maxId = Math.max(...this.products.map(p => parseInt(p.id as string)), 0);
       const newProduct: Product = {
@@ -190,11 +218,11 @@ export class ProductManagementComponent implements OnInit {
       this.backendService.createProduct(newProduct).subscribe(
         (response) => {
           console.log('Product created successfully:', response);
-          
+
           // Update local products list
           this.products.push(response.data || newProduct);
           this.filteredProducts = [...this.products];
-          
+
           this.successMessage = 'Product added successfully!';
           setTimeout(() => {
             this.closeModals();
@@ -224,7 +252,7 @@ export class ProductManagementComponent implements OnInit {
       // Convert category slug to category name
       const categoryObj = this.categories.find(c => c.slug === this.productForm.category);
       const categoryName = categoryObj ? categoryObj.name : (this.productForm.category || '');
-      
+
       // Prepare the product data for API
       const updatedProductData = {
         ...this.productForm as Product,
@@ -236,14 +264,14 @@ export class ProductManagementComponent implements OnInit {
       this.backendService.updateProduct(this.selectedProduct.id, updatedProductData).subscribe(
         (response) => {
           console.log('Product updated successfully:', response);
-          
+
           // Update local products list
           const index = this.products.findIndex(p => p.id === this.selectedProduct!.id);
           if (index !== -1) {
             this.products[index] = updatedProductData;
             this.filteredProducts = [...this.products];
           }
-          
+
           this.successMessage = 'Product updated successfully!';
           setTimeout(() => {
             this.closeModals();
@@ -302,7 +330,7 @@ export class ProductManagementComponent implements OnInit {
         ...this.products[index],
         inStock: !this.products[index].inStock
       };
-      
+
       this.backendService.updateProduct(product.id as string, updatedProduct).subscribe(
         (response) => {
           this.products[index] = updatedProduct;
@@ -315,6 +343,30 @@ export class ProductManagementComponent implements OnInit {
     }
   }
 
+  onPriceChange(product: Product, event: any) {
+    const newPrice = parseFloat(event.target.value);
+    if (newPrice < 0) return;
+
+    const index = this.products.findIndex(p => p.id === product.id);
+    if (index !== -1) {
+      const updatedProduct = {
+        ...this.products[index],
+        price: newPrice
+      };
+
+      this.backendService.updateProduct(product.id as string, updatedProduct).subscribe(
+        (response) => {
+          this.products[index] = updatedProduct;
+          console.log('Price updated dynamically');
+        },
+        (error) => {
+          console.error('Error updating price:', error);
+          event.target.value = product.price;
+        }
+      );
+    }
+  }
+
   toggleHot(product: Product) {
     const index = this.products.findIndex(p => p.id === product.id);
     if (index !== -1) {
@@ -322,7 +374,7 @@ export class ProductManagementComponent implements OnInit {
         ...this.products[index],
         isHot: !this.products[index].isHot
       };
-      
+
       this.backendService.updateProduct(product.id as string, updatedProduct).subscribe(
         (response) => {
           this.products[index] = updatedProduct;
@@ -340,7 +392,7 @@ export class ProductManagementComponent implements OnInit {
     if (input.files && input.files[0]) {
       this.selectedImageFile = input.files[0];
       console.log('File selected:', this.selectedImageFile.name, 'Size:', this.selectedImageFile.size);
-      
+
       // Validate file type
       if (!this.selectedImageFile.type.startsWith('image/')) {
         this.errorMessage = 'Please select a valid image file';
@@ -364,7 +416,7 @@ export class ProductManagementComponent implements OnInit {
         console.log('Image loaded, base64 length:', this.productForm.image?.length);
       };
       reader.readAsDataURL(this.selectedImageFile);
-      
+
       this.errorMessage = '';
     }
   }
@@ -429,7 +481,7 @@ export class ProductManagementComponent implements OnInit {
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
         // Use the local path instead of the URL
         this.productForm.image = result.imagePath;

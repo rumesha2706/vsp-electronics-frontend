@@ -37,8 +37,9 @@
     <div class="filter-group">
       <select [(ngModel)]="selectedBrand" (ngModelChange)="filterProducts()">
         <option value="">All Brands</option>
-        <option value="acebott">ACEBOTT</option>
-        <option value="other">Other</option>
+        <option *ngFor="let brand of brands" [value]="brand.name">
+          {{ brand.name }}
+        </option>
       </select>
     </div>
 
@@ -75,11 +76,16 @@
           <td>{{ product.category }}</td>
           <td>{{ product.brand }}</td>
           <td>
-            <span class="price">₹{{ product.price }}</span>
-            <span class="original-price" *ngIf="product.originalPrice">₹{{ product.originalPrice }}</span>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span>₹</span>
+              <input type="number" [ngModel]="product.price" (change)="onPriceChange(product, $event)"
+                class="price-input" min="0">
+            </div>
+            <div class="original-price" *ngIf="product.originalPrice">₹{{ product.originalPrice }}</div>
           </td>
           <td>
-            <button class="toggle-btn" [class.active]="product.inStock" (click)="toggleStock(product)">
+            <button class="toggle-btn" [class.active]="product.inStock" [class.out]="!product.inStock"
+              (click)="toggleStock(product)">
               {{ product.inStock ? 'In Stock' : 'Out of Stock' }}
             </button>
             <div style="font-size: 0.8rem; margin-top: 4px; color: #666;">

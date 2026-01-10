@@ -17,7 +17,7 @@
   align-items: flex-start;
 }
 
-.page-header > div:first-child {
+.page-header>div:first-child {
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -173,6 +173,30 @@ tr:hover {
 .toggle-btn.active {
   background: #0066cc;
   color: white;
+  border-color: #0066cc;
+}
+
+.toggle-btn.out {
+  background: #ffebee;
+  color: #c62828;
+  border-color: #ef5350;
+}
+
+.toggle-btn.out:hover {
+  background: #ffcdd2;
+}
+
+.price-input {
+  width: 80px;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-weight: 600;
+  color: #0066cc;
+}
+
+.price-input:focus {
+  outline: none;
   border-color: #0066cc;
 }
 

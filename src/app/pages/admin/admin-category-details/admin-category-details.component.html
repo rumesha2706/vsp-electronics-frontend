@@ -248,11 +248,56 @@
                     <label>Subcategory Name</label>
                     <input type="text" [(ngModel)]="subcategoryForm.name" placeholder="Enter subcategory name">
                 </div>
-                <!-- Add more fields for image upload if needed -->
+                <div class="form-group">
+                    <label>Subcategory Image</label>
+                    <input type="file" (change)="onSubcategoryFileSelected($event)" accept="image/*">
+                    <div *ngIf="subcategoryForm.image_url" style="margin-top: 10px; height: 100px;">
+                        <img [src]="subcategoryForm.image_url"
+                            style="height: 100%; object-fit: contain; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" (click)="closeModals()">Cancel</button>
                 <button class="btn btn-primary" (click)="saveSubcategory()">Save Subcategory</button>
+            </div>
+        </div>
+    </div>
+    <!-- Category Edit Modal -->
+    <div class="modal-overlay" *ngIf="showCategoryModal" (click)="closeModals()">
+        <div class="modal-content" (click)="$event.stopPropagation()" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-edit"></i> Edit Category
+                </h2>
+                <button class="close-btn" (click)="closeModals()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Category Name <span style="color: red">*</span></label>
+                    <input type="text" [(ngModel)]="categoryForm.name" placeholder="Category Name">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea [(ngModel)]="categoryForm.description" rows="3"
+                        placeholder="Category Description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Display Order</label>
+                    <input type="number" [(ngModel)]="categoryForm.display_order" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Category Image</label>
+                    <input type="file" (change)="onCategoryFileSelected($event)" accept="image/*">
+                    <div *ngIf="categoryForm.image_url" style="margin-top: 10px; height: 120px;">
+                        <img [src]="categoryForm.image_url"
+                            style="height: 100%; object-fit: contain; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+                <button class="btn btn-primary" (click)="saveCategory()">Save Changes</button>
             </div>
         </div>
     </div>

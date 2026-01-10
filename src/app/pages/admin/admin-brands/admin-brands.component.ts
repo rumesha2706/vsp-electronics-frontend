@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BackendProductService } from '../../../services/backend-product.service';
 import { environment } from '../../../../environments/environment';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 interface Brand {
   id?: number;
@@ -24,7 +25,7 @@ interface Brand {
 @Component({
   selector: 'app-admin-brands',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DragDropModule],
   templateUrl: './admin-brands.component.html',
   styleUrls: ['./admin-brands.component.css']
 })
@@ -97,7 +98,7 @@ export class AdminBrandsComponent implements OnInit {
             display_order: brand.metadata?.display_order || 0,
             is_featured: brand.metadata?.is_featured || false,
             product_count: brand.metadata?.product_count || 0
-          }));
+          })).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
           console.log('Final Brands Array:', this.brands);
           this.loading = false;
         },
@@ -325,6 +326,41 @@ export class AdminBrandsComponent implements OnInit {
         if (this.selectedBrand) this.loadProducts(this.selectedBrand.name);
       });
     }
+  }
+  viewProduct(product: any) {
+    this.router.navigate(['/product', product.id]);
+  }
+
+  onDrop(event: CdkDragDrop<Brand[]>) {
+    moveItemInArray(this.brands, event.previousIndex, event.currentIndex);
+    this.updateDisplayOrder();
+  }
+
+  updateDisplayOrder() {
+    const updates = this.brands.map((brand, index) => {
+      const newOrder = index + 1;
+      // Only update if order changed
+      if (brand.display_order !== newOrder && brand.id) {
+        brand.display_order = newOrder;
+        // The endpoint updateBrand accepts Partial<Brand>
+        // But backend route expects flat fields like { display_order: ... } or { ...updates } which maps to DB.
+        // check categories-model.js updateBrand: it allows display_order via 'displayOrder' case?
+        // categories-api-router.js PUT /admin/brands/:id uses `req.body` and calls `updateBrand`.
+        // categories-model.js updateBrand iterates updates. The key must be 'display_order' or similar. 
+        // No, model expects 'display_order' if key is NOT 'displayOrder'?
+        // Model logic: key === 'displayOrder' ? 'display_order' : key
+        // So passing 'displayOrder' works.
+        return this.http.put(`${this.apiUrl}/categories/admin/brands/${brand.id}`, { displayOrder: newOrder }, { headers: this.getAuthHeaders() }).toPromise();
+      }
+      return Promise.resolve();
+    });
+
+    Promise.all(updates).then(() => {
+      console.log('Brands order updated successfully');
+    }).catch(err => {
+      console.error('Failed to update brand order', err);
+      this.error = 'Failed to update order';
+    });
   }
   slugify(text: string): string {
     return text

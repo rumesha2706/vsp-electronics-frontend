@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BackendProductService } from '../../../services/backend-product.service';
 import { environment } from '../../../../environments/environment';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 interface Subcategory {
   id?: number;
@@ -25,7 +26,7 @@ interface Category {
 @Component({
   selector: 'app-admin-subcategories',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DragDropModule],
   templateUrl: './admin-subcategories.component.html',
   styleUrls: ['./admin-subcategories.component.css']
 })
@@ -51,8 +52,10 @@ export class AdminSubcategoriesComponent implements OnInit {
     display_order: 0
   };
 
+  categoriesWithSubcategories: any[] = [];
+
   ngOnInit() {
-    this.loadCategories();
+    this.loadCategories(); // Keep this to populate the dropdown for "Add/Edit" form
     this.loadSubcategories();
   }
 
@@ -78,28 +81,26 @@ export class AdminSubcategoriesComponent implements OnInit {
 
   loadSubcategories() {
     this.loading = true;
-    // Fetch categories with details (includes subcategories)
     this.http.get<any>(`${this.apiUrl}/categories?includeDetails=true`)
       .subscribe(
         (response) => {
-          console.log('Categories API Response:', response);
-          const categories = Array.isArray(response) ? response : response.data || [];
-          const allSubcategories: Subcategory[] = [];
+          const rawCategories = Array.isArray(response) ? response : response.data || [];
 
-          // Aggregate subcategories from all categories
-          categories.forEach((cat: any) => {
+          this.categoriesWithSubcategories = rawCategories.map((cat: any) => {
+            // Sort subcategories by display_order
             if (cat.subcategories && Array.isArray(cat.subcategories)) {
-              cat.subcategories.forEach((subcat: any) => {
-                allSubcategories.push({
-                  ...subcat,
-                  category_id: cat.id
-                });
-              });
+              cat.subcategories.sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
+              // Ensure we add category_id to subobjects for convenience if missing
+              cat.subcategories.forEach((sub: any) => sub.category_id = cat.id);
+            } else {
+              cat.subcategories = [];
             }
+            return cat;
           });
 
-          console.log('Final Subcategories Array:', allSubcategories);
-          this.subcategories = allSubcategories;
+          // Also flatten for the "Products" view or legacy support if needed, but UI will primarily use categoriesWithSubcategories
+          this.subcategories = this.categoriesWithSubcategories.flatMap(c => c.subcategories);
+
           this.loading = false;
         },
         (error) => {
@@ -108,6 +109,38 @@ export class AdminSubcategoriesComponent implements OnInit {
           this.loading = false;
         }
       );
+  }
+
+  // ... (openForm, closeForm, onFileSelected, saveSubcategory, deleteSubcategory remain same, but call loadSubcategories on success)
+
+  // Update onDrop to handle specific list
+  onDrop(event: CdkDragDrop<Subcategory[]>, category: any) {
+    if (event.previousContainer === event.container) {
+      // Reordering within the same category
+      moveItemInArray(category.subcategories, event.previousIndex, event.currentIndex);
+      this.updateDisplayOrder(category.subcategories);
+    } else {
+      // Moving between categories? (Optional: if we want to support reparenting via drag)
+      // For now, let's assume strict separate lists.
+    }
+  }
+
+  updateDisplayOrder(subcategories: Subcategory[]) {
+    const updates = subcategories.map((sub, index) => {
+      const newOrder = index + 1;
+      if (sub.display_order !== newOrder && sub.id && sub.category_id) {
+        sub.display_order = newOrder;
+        return this.http.put(`${this.apiUrl}/categories/admin/${sub.category_id}/subcategories/${sub.id}`, { displayOrder: newOrder }).toPromise();
+      }
+      return Promise.resolve();
+    });
+
+    Promise.all(updates).then(() => {
+      console.log('Subcategories order updated successfully');
+    }).catch(err => {
+      console.error('Failed to update subcategory order', err);
+      this.error = 'Failed to update order';
+    });
   }
 
   openForm(subcategory?: Subcategory) {
@@ -349,4 +382,10 @@ export class AdminSubcategoriesComponent implements OnInit {
       });
     }
   }
+
+  viewProduct(product: any) {
+    this.router.navigate(['/product', product.id]);
+  }
 }
+
+

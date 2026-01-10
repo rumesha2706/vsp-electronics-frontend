@@ -160,7 +160,12 @@ export class CategoryProductsComponent implements OnInit {
     // Add subcategory filter only if a specific subcategory is selected
     // Pass the slug (e.g., 'rpi-accessories') to match DB values and API expectations
     // Otherwise, the API will return all products in the category (both with and without subcategories)
-    if (this.subcategoryName) {
+    // Add subcategory filter only if a specific subcategory is selected
+    // Pass the slug (e.g., 'rpi-accessories') to match DB values and API expectations
+    // Otherwise, the API will return all products in the category (both with and without subcategories)
+    if (this.subcategorySlug) {
+      queryParams.subcategory = this.subcategorySlug;
+    } else if (this.subcategoryName) {
       queryParams.subcategory = this.subcategoryName;
     }
 
