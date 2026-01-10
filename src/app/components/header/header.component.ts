@@ -84,6 +84,21 @@ export class HeaderComponent implements OnInit {
     this.searchOpen = !this.searchOpen;
   }
 
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+    // Prevent body scroll when menu is open
+    if (this.mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
+    document.body.style.overflow = 'auto';
+  }
+
   onSearch() {
     if (this.searchQuery.trim()) {
       this.router.navigate(['/shop'], {

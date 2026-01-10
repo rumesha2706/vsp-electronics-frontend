@@ -87,26 +87,63 @@
     <div class="container">
       <div class="nav-wrapper">
         <div class="nav-left">
+          <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+            <i class="fas fa-bars"></i>
+          </button>
+
           <a routerLink="/all-categories" class="categories-btn">
-            <i class="fas fa-th"></i> Product Categories |
+            <i class="fas fa-th"></i> <span class="desktop-text">Product Categories |</span><span
+              class="mobile-text">Categories</span>
           </a>
-          <ul class="nav-menu">
+
+          <!-- Mobile Menu Overlay -->
+          <div class="mobile-menu-overlay" *ngIf="mobileMenuOpen" (click)="closeMobileMenu()"></div>
+
+          <!-- Navigation Menu (Slide out on mobile) -->
+          <ul class="nav-menu" [class.open]="mobileMenuOpen">
+            <li class="menu-header mobile-only">
+              <h3>Menu</h3>
+              <button class="close-menu-btn" (click)="closeMobileMenu()">
+                <i class="fas fa-times"></i>
+              </button>
+            </li>
             <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-                (click)="closeQuoteSidebar()">Home</a></li>
-            <li><a routerLink="/about-us" routerLinkActive="active" (click)="closeQuoteSidebar()">About Us</a></li>
-            <li><a routerLink="/contact-us" routerLinkActive="active" (click)="closeQuoteSidebar()">Contact Us</a></li>
+                (click)="closeMobileMenu(); closeQuoteSidebar()">Home</a></li>
+            <li><a routerLink="/about-us" routerLinkActive="active"
+                (click)="closeMobileMenu(); closeQuoteSidebar()">About Us</a></li>
+            <li><a routerLink="/contact-us" routerLinkActive="active"
+                (click)="closeMobileMenu(); closeQuoteSidebar()">Contact Us</a></li>
+
+            <li class="mobile-only divider"></li>
+
+            <!-- Mobile User Actions -->
             <li class="mobile-only" *ngIf="!isLoggedIn">
-              <a (click)="openAuthModal(); closeQuoteSidebar()" style="cursor: pointer;">
+              <a (click)="openAuthModal(); closeMobileMenu(); closeQuoteSidebar()" style="cursor: pointer;">
                 <i class="fas fa-sign-in-alt"></i> Login / Register
               </a>
             </li>
+
             <li class="mobile-only" *ngIf="isLoggedIn">
-              <a routerLink="/my-account" (click)="closeQuoteSidebar()">
+              <div class="mobile-user-info">
+                <span class="welcome-text">Hi, {{ (currentUser?.firstName || currentUser?.name || '').split(' ')[0]
+                  }}</span>
+              </div>
+            </li>
+
+            <li class="mobile-only" *ngIf="isLoggedIn">
+              <a routerLink="/my-account" (click)="closeMobileMenu(); closeQuoteSidebar()">
                 <i class="fas fa-user-circle"></i> My Account
               </a>
             </li>
+
+            <li class="mobile-only" *ngIf="isLoggedIn && authService.isAdmin()">
+              <a routerLink="/admin" (click)="closeMobileMenu(); closeQuoteSidebar()" class="admin-link-mobile">
+                <i class="fas fa-shield-alt"></i> Admin Dashboard
+              </a>
+            </li>
+
             <li class="mobile-only" *ngIf="isLoggedIn">
-              <a (click)="onLogout(); closeQuoteSidebar()" style="cursor: pointer; color: #d32f2f;">
+              <a (click)="onLogout(); closeMobileMenu(); closeQuoteSidebar()" style="cursor: pointer; color: #d32f2f;">
                 <i class="fas fa-sign-out-alt"></i> Logout
               </a>
             </li>
