@@ -1,0 +1,54 @@
+<div class="product-card">
+  <a [routerLink]="['/product', product.id]" class="product-link">
+    <div class="product-badges">
+      <span class="badge badge-hot" *ngIf="product.isHot">HOT</span>
+      <span class="badge badge-new" *ngIf="product.isNew">NEW</span>
+      <span class="badge badge-discount" *ngIf="getDiscountPercentage()">-{{ getDiscountPercentage() }}%</span>
+    </div>
+
+    <div class="product-image">
+      <img [src]="product.image || 'assets/images/placeholder.jpg'" 
+           [alt]="product.name"
+           [class.loaded]="imageLoaded"
+           (load)="onImageLoad()"
+           (error)="onImageError($event)">
+    </div>
+
+    <div class="product-info">
+      <h3 class="product-name">{{ product.name }}</h3>
+      
+      <div class="product-brand" *ngIf="product.brand">
+        <span class="brand-label">Brand:</span> {{ product.brand }}
+      </div>
+      
+      <div class="product-rating">
+        <i class="fas fa-star" *ngFor="let star of [1,2,3,4,5]" 
+           [class.filled]="star <= product.rating"></i>
+      </div>
+
+      <div class="product-price">
+        <span class="current-price">₹{{ product.price }}</span>
+        <span class="original-price" *ngIf="product.originalPrice">₹{{ product.originalPrice }}</span>
+      </div>
+
+      <div class="product-stock" [class.out-of-stock]="!product.inStock">
+        {{ product.inStock ? 'In Stock' : 'Out of Stock' }}
+      </div>
+    </div>
+  </a>
+
+  <div class="product-actions">
+    <button class="btn-icon wishlist-btn" 
+            (click)="toggleWishlist($event)"
+            [class.active]="isInWishlist()"
+            [attr.aria-label]="isInWishlist() ? 'Remove from wishlist' : 'Add to wishlist'">
+      <i class="fas fa-heart"></i>
+    </button>
+    
+    <button class="btn btn-primary add-to-cart" 
+            (click)="addToCart($event)"
+            [disabled]="!product.inStock">
+      <i class="fas fa-shopping-cart"></i> Add to Cart
+    </button>
+  </div>
+</div>

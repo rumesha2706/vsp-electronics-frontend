@@ -1,0 +1,20 @@
+<div class="all-categories-container">
+  <div class="page-header">
+    <h1>All Product Categories</h1>
+    <p>Explore our complete range of electronics and components</p>
+  </div>
+
+  <div class="categories-grid">
+    <div *ngFor="let category of categories" class="category-card">
+      <a [routerLink]="['/category', category.slug]" class="category-link">
+        <div class="category-image">
+          <img [src]="category.image" [alt]="category.name" />
+        </div>
+        <div class="category-info">
+          <h3>{{ category.name }}</h3>
+          <p class="product-count">{{ category.productCount }} products</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

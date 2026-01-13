@@ -1,0 +1,257 @@
+<div class="product-add-page">
+  <!-- Header with Back Button -->
+  <div class="page-header">
+    <div class="header-content">
+      <button class="btn-back" (click)="goBack()" title="Go back">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+      <div>
+        <h1><i class="fas fa-plus-square"></i> Add New Product</h1>
+        <p>Fill in the form below to add a new product to your catalog</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    <i class="fas fa-check-circle"></i> {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+  </div>
+
+  <!-- Form -->
+  <div class="form-container">
+    <form (ngSubmit)="saveProduct()">
+      <div class="form-grid">
+        <!-- Basic Information -->
+        <div class="form-section">
+          <h2><i class="fas fa-info-circle"></i> Basic Information</h2>
+          
+          <div class="form-group">
+            <label for="name">Product Name *</label>
+            <input 
+              id="name"
+              type="text" 
+              [(ngModel)]="productForm.name"
+              name="name"
+              placeholder="Enter product name"
+              required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category">Category *</label>
+              <select 
+                id="category"
+                [(ngModel)]="productForm.category"
+                name="category"
+                required>
+                <option value="">Select a category</option>
+                <option *ngFor="let category of categories" [value]="category.slug">
+                  {{ category.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="subcategory">Subcategory</label>
+              <select 
+                id="subcategory"
+                [(ngModel)]="productForm.subcategory"
+                name="subcategory">
+                <option value="">Select a subcategory</option>
+                <option *ngFor="let subcat of getSubcategories()" [value]="subcat.slug">
+                  {{ subcat.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="brand">Brand *</label>
+              <select 
+                id="brand"
+                [(ngModel)]="productForm.brand"
+                name="brand"
+                required>
+                <option *ngFor="let brand of brands" [value]="brand.slug">
+                  {{ brand.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="inStock">Stock Status</label>
+              <select 
+                id="inStock"
+                [(ngModel)]="productForm.inStock"
+                name="inStock">
+                <option [value]="true">In Stock</option>
+                <option [value]="false">Out of Stock</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="form-section">
+          <h2><i class="fas fa-tag"></i> Pricing</h2>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="price">Price (₹) *</label>
+              <input 
+                id="price"
+                type="number" 
+                [(ngModel)]="productForm.price"
+                name="price"
+                placeholder="0"
+                min="0"
+                step="0.01"
+                required>
+            </div>
+
+            <div class="form-group">
+              <label for="originalPrice">Original Price (₹)</label>
+              <input 
+                id="originalPrice"
+                type="number" 
+                [(ngModel)]="productForm.originalPrice"
+                name="originalPrice"
+                placeholder="0"
+                min="0"
+                step="0.01">
+              <small>Leave blank if same as price</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image -->
+        <div class="form-section">
+          <h2><i class="fas fa-image"></i> Product Image</h2>
+          
+          <div class="image-mode-toggle">
+            <button 
+              type="button"
+              class="toggle-btn" 
+              [class.active]="imageUploadMode === 'file'"
+              (click)="toggleImageMode('file')">
+              <i class="fas fa-upload"></i> Upload File
+            </button>
+            <button 
+              type="button"
+              class="toggle-btn" 
+              [class.active]="imageUploadMode === 'url'"
+              (click)="toggleImageMode('url')">
+              <i class="fas fa-link"></i> Image URL
+            </button>
+          </div>
+
+          <div *ngIf="imageUploadMode === 'file'" class="form-group">
+            <label for="imageFile">Choose Image File</label>
+            <input 
+              id="imageFile"
+              type="file" 
+              (change)="onImageFileSelected($event)"
+              accept="image/*">
+            <small>Supported formats: JPG, PNG, GIF (Max 5MB)</small>
+          </div>
+
+          <div *ngIf="imageUploadMode === 'url'" class="form-group">
+            <label for="imageUrl">Image URL</label>
+            <input 
+              id="imageUrl"
+              type="url" 
+              [(ngModel)]="imageUrlInput"
+              name="imageUrl"
+              (change)="onImageUrlChange()"
+              placeholder="https://example.com/image.jpg">
+          </div>
+
+          <div *ngIf="imagePreview" class="image-preview">
+            <img [src]="imagePreview" alt="Product preview">
+            <button type="button" class="btn-remove-image" (click)="imagePreview = null; productForm.image = ''">
+              <i class="fas fa-times"></i> Remove
+            </button>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-section">
+          <h2><i class="fas fa-align-left"></i> Description</h2>
+          
+          <div class="form-group">
+            <label for="description">Short Description *</label>
+            <textarea 
+              id="description"
+              [(ngModel)]="productForm.description"
+              name="description"
+              placeholder="Enter a brief product description"
+              rows="4"
+              required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="aboutProduct">About Product</label>
+            <textarea 
+              id="aboutProduct"
+              [(ngModel)]="productForm.aboutProduct"
+              name="aboutProduct"
+              placeholder="Enter detailed product information"
+              rows="4"></textarea>
+          </div>
+        </div>
+
+        <!-- Features -->
+        <div class="form-section">
+          <h2><i class="fas fa-star"></i> Product Visibility & Promotion</h2>
+          
+          <div class="form-group">
+            <label for="isFeatured">
+              <input 
+                id="isFeatured"
+                type="checkbox" 
+                [(ngModel)]="productForm.isFeatured"
+                name="isFeatured">
+              <i class="fas fa-star"></i> Featured Product - Show on home page featured section
+            </label>
+          </div>
+          
+          <div class="form-group">
+            <label for="isNew">
+              <input 
+                id="isNew"
+                type="checkbox" 
+                [(ngModel)]="productForm.isNew"
+                name="isNew">
+              <i class="fas fa-gift"></i> New Product - Show on new products section
+            </label>
+          </div>
+          
+          <div class="form-group">
+            <label for="isHot">
+              <input 
+                id="isHot"
+                type="checkbox" 
+                [(ngModel)]="productForm.isHot"
+                name="isHot">
+              <i class="fas fa-fire"></i> Hot/Popular - Mark as trending/popular product
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="goBack()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+          <i class="fas fa-save"></i> {{ isSubmitting ? 'Saving...' : 'Save Product' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

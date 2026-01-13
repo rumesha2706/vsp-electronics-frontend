@@ -1,0 +1,64 @@
+<div class="compare-page">
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Compare Products</h1>
+      <button *ngIf="compareItems().length > 0" (click)="clearCompare()" class="btn btn-outline-danger btn-sm">
+        Clear All
+      </button>
+    </div>
+
+    <div *ngIf="compareItems().length === 0" class="empty-compare">
+      <i class="fas fa-exchange-alt"></i>
+      <h2>No products to compare</h2>
+      <p>Add products to compare their features!</p>
+      <a routerLink="/shop" class="btn btn-primary">Start Shopping</a>
+    </div>
+
+    <div *ngIf="compareItems().length > 0" class="compare-table-container">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th *ngFor="let product of compareItems()">
+              <div class="product-header">
+                <button class="remove-btn" (click)="removeFromCompare(product.id)" title="Remove">
+                  <i class="fas fa-times"></i>
+                </button>
+                <a [routerLink]="['/product', product.id]" class="product-link">
+                  <img [src]="product.image" [alt]="product.name" class="product-image">
+                  <span class="product-title">{{ product.name }}</span>
+                </a>
+                <div class="product-price">{{ product.price | currency:'INR' }}</div>
+                <button class="btn btn-sm btn-primary add-cart-btn">Add to Cart</button>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="feature-label">Brand</td>
+            <td *ngFor="let product of compareItems()">{{ product.brand || 'N/A' }}</td>
+          </tr>
+          <tr>
+            <td class="feature-label">Category</td>
+            <td *ngFor="let product of compareItems()">{{ product.category }}</td>
+          </tr>
+          <tr>
+            <td class="feature-label">Availability</td>
+            <td *ngFor="let product of compareItems()">
+              <span [class.in-stock]="product.inStock" [class.out-of-stock]="!product.inStock">
+                {{ product.inStock ? 'In Stock' : 'Out of Stock' }}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="feature-label">Description</td>
+            <td *ngFor="let product of compareItems()" class="description-cell">
+              <p>{{ product.description || 'No description available' }}</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

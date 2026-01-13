@@ -1,0 +1,188 @@
+<div class="admin-orders-page">
+    <div class="page-header">
+        <h1><i class="fas fa-boxes"></i> Manage Orders</h1>
+        <div class="header-actions">
+            <button class="btn btn-outline" (click)="loadOrders()">
+                <i class="fas fa-sync-alt" [class.fa-spin]="isLoading()"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label>Search</label>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" class="search-input"
+                placeholder="Search Order ID, Customer, Product...">
+        </div>
+
+        <div class="filter-group">
+            <label>Start Date</label>
+            <input type="date" [ngModel]="startDate()" (ngModelChange)="startDate.set($event)" class="date-input">
+        </div>
+
+        <div class="filter-group">
+            <label>End Date</label>
+            <input type="date" [ngModel]="endDate()" (ngModelChange)="endDate.set($event)" class="date-input">
+        </div>
+
+        <div class="filter-group">
+            <label>Status</label>
+            <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+                <option value="">All Statuses</option>
+                <option *ngFor="let status of orderStatuses" [value]="status">{{ status | titlecase }}</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Payment Status</label>
+            <select [ngModel]="paymentStatusFilter()" (ngModelChange)="paymentStatusFilter.set($event)">
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
+                <option value="refunded">Refunded</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Payment Method</label>
+            <select [ngModel]="paymentMethodFilter()" (ngModelChange)="paymentMethodFilter.set($event)">
+                <option value="">All</option>
+                <option value="cod">COD</option>
+                <option value="upi">UPI</option>
+                <option value="card">Card</option>
+                <option value="netbanking">Net Banking</option>
+            </select>
+        </div>
+
+        <div class="filter-group amount-range">
+            <label>Amount Range</label>
+            <div class="range-inputs">
+                <input type="number" [ngModel]="minAmount()" (ngModelChange)="minAmount.set($event)" placeholder="Min"
+                    class="amount-input">
+                <span>-</span>
+                <input type="number" [ngModel]="maxAmount()" (ngModelChange)="maxAmount.set($event)" placeholder="Max"
+                    class="amount-input">
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button class="btn btn-primary" (click)="applyFilters()">Apply</button>
+            <button class="btn btn-outline" (click)="resetFilters()">Reset</button>
+        </div>
+    </div>
+
+    <div class="orders-table-container">
+        <div *ngIf="isLoading() && orders().length === 0" class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i> Loading orders...
+        </div>
+
+        <table *ngIf="orders().length > 0" class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let order of orders()">
+                    <td>
+                        <span class="order-id">#{{ order.id }}</span>
+                    </td>
+                    <td>
+                        <div class="customer-info">
+                            <strong>{{ order.customer.firstName }} {{ order.customer.lastName }}</strong>
+                            <small>{{ order.customer.email }}</small>
+                        </div>
+                    </td>
+                    <td>{{ order.createdAt | date:'mediumDate' }}</td>
+                    <td><span class="badge">{{ order.itemCount || order.items.length || 0 }}</span></td>
+                    <td class="amount">₹{{ order.pricing.total | number }}</td>
+                    <td>
+                        <span class="status-badge" [style.background-color]="getStatusColor(order.status) + '20'"
+                            [style.color]="getStatusColor(order.status)">
+                            {{ getStatusIcon(order.status) }} {{ order.status | titlecase }}
+                        </span>
+                    </td>
+                    <td class="actions-cell">
+                        <div class="actions-wrapper">
+                            <!-- Quick Actions -->
+                            <button *ngIf="order.status !== 'delivered' && order.status !== 'cancelled'"
+                                class="btn-icon success" title="Mark as Delivered"
+                                (click)="updateStatus(order, 'delivered')">
+                                <i class="fas fa-check-circle"></i> Mark Delivered
+                            </button>
+
+                            <button *ngIf="order.status === 'pending'" class="btn-icon primary"
+                                title="Mark as Confirmed" (click)="updateStatus(order, 'confirmed')">
+                                <i class="fas fa-clipboard-check"></i>
+                            </button>
+
+                            <button *ngIf="order.status === 'confirmed'" class="btn-icon process"
+                                title="Mark as Processing" (click)="updateStatus(order, 'processing')">
+                                <i class="fas fa-cog"></i>
+                            </button>
+
+                            <button *ngIf="order.status === 'processing'" class="btn-icon ship" title="Mark as Shipped"
+                                (click)="updateStatus(order, 'shipped')">
+                                <i class="fas fa-shipping-fast"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div *ngIf="!isLoading() && orders().length === 0" class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <h3>No orders found</h3>
+            <p>Try changing your filters or check back later.</p>
+        </div>
+    </div>
+
+    <div class="pagination" *ngIf="orders().length > 0">
+        <button [disabled]="currentPage() === 1" (click)="prevPage()"><i class="fas fa-chevron-left"></i>
+            Previous</button>
+        <span>Page {{ currentPage() }}</span>
+        <button [disabled]="orders().length < 20" (click)="nextPage()">Next <i
+                class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-backdrop" *ngIf="showConfirmModal()" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Update Order Status</h3>
+                <button class="close-btn" (click)="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to update order <strong>#{{ selectedOrder()?.id }}</strong> status to
+                    <strong>{{ selectedStatus() | titlecase }}</strong>?
+                </p>
+                <div class="status-preview">
+                    <span class="status-badge"
+                        [style.background-color]="getStatusColor(selectedStatus() || 'pending') + '20'"
+                        [style.color]="getStatusColor(selectedStatus() || 'pending')">
+                        {{ getStatusIcon(selectedStatus() || 'pending') }} {{ selectedStatus() | titlecase }}
+                    </span>
+                </div>
+                <p class="warning-text" *ngIf="selectedStatus() === 'delivered'">
+                    <i class="fas fa-envelope"></i> This will send a delivery confirmation email to the customer.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+                <button class="btn btn-primary" (click)="confirmUpdate()">
+                    Confirm Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

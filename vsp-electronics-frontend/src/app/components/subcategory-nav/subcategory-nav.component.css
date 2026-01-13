@@ -1,0 +1,90 @@
+.subcategory-nav {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 30px;
+}
+
+.subcategory-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 15px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.subcategory-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.subcategory-link:hover {
+  border-color: #666;
+  background-color: #f9f9f9;
+  transform: translateY(-2px);
+}
+
+.subcategory-link.active {
+  background-color: #333;
+  color: white;
+  border-color: #333;
+}
+
+.subcategory-link .count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.subcategory-link.active .count {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar styling for horizontal scroll */
+.subcategory-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.subcategory-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.subcategory-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 2px;
+}
+
+.subcategory-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+@media (max-width: 768px) {
+  .subcategory-link {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .subcategory-link .count {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+}

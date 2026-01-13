@@ -1,0 +1,168 @@
+<div class="whatsapp-container">
+  <div class="whatsapp-header">
+    <div class="icon-wrapper">
+      <i class="fab fa-whatsapp"></i>
+    </div>
+    <h1>Connect with us on WhatsApp</h1>
+    <p>Get instant support and personalized assistance for all your queries</p>
+  </div>
+
+  <div class="whatsapp-content">
+    <!-- Logged In User Section -->
+    <div class="user-info-section" *ngIf="isUserLoggedIn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+      <h2 style="margin-top: 0;">👋 Welcome, {{ currentUser?.name }}!</h2>
+      <p>Your registered mobile: <strong>{{ currentUserPhone }}</strong></p>
+      <p>We'll use your details to provide personalized responses to your inquiries.</p>
+    </div>
+
+    <!-- Login Prompt Section -->
+    <div class="login-prompt" *ngIf="!isUserLoggedIn" style="background-color: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px; padding: 15px; margin-bottom: 30px;">
+      <i class="fas fa-exclamation-circle" style="color: #ff9800; margin-right: 10px;"></i>
+      <span>Please login with your phone number to receive personalized WhatsApp responses.</span>
+    </div>
+
+    <!-- Message Type Selection -->
+    <div class="message-type-selection" style="margin-bottom: 30px;">
+      <h2>Choose How to Connect</h2>
+      <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <button 
+          (click)="selectMessageType('predefined')"
+          [style.background-color]="selectedMessageType === 'predefined' ? '#4caf50' : '#f0f0f0'"
+          [style.color]="selectedMessageType === 'predefined' ? 'white' : '#333'"
+          style="padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+          📋 Use Template
+        </button>
+        <button 
+          (click)="selectMessageType('custom')"
+          [style.background-color]="selectedMessageType === 'custom' ? '#4caf50' : '#f0f0f0'"
+          [style.color]="selectedMessageType === 'custom' ? 'white' : '#333'"
+          style="padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+          ✏️ Write Custom Message
+        </button>
+      </div>
+    </div>
+
+    <!-- Template Selection -->
+    <div class="template-selection" *ngIf="selectedMessageType === 'predefined'" style="margin-bottom: 30px;">
+      <h2>Select a Message Template</h2>
+      <p class="subtitle">Choose a pre-written message that matches your need</p>
+      
+      <div class="template-buttons" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+        <button 
+          *ngFor="let template of messageTemplates"
+          (click)="selectTemplate(template)"
+          [style.border]="selectedTemplate?.title === template.title ? '2px solid #4caf50' : '2px solid #ddd'"
+          [style.background-color]="selectedTemplate?.title === template.title ? '#e8f5e9' : 'white'"
+          style="padding: 15px; border-radius: 4px; cursor: pointer; text-align: left; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <div style="font-weight: bold; color: #333;">{{ template.title }}</div>
+          <div style="font-size: 12px; color: #666; margin-top: 5px;">{{ template.template }}</div>
+        </button>
+      </div>
+
+      <!-- Message Preview -->
+      <div class="message-preview" *ngIf="selectedTemplate" style="background-color: #f5f5f5; border-radius: 4px; padding: 15px; margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
+        <h3 style="margin-top: 0;">📝 Message Preview:</h3>
+        <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: Arial, sans-serif; color: #333;">{{ getMessagePreview() }}</pre>
+      </div>
+    </div>
+
+    <!-- Custom Message -->
+    <div class="custom-message-input" *ngIf="selectedMessageType === 'custom'" style="margin-bottom: 30px;">
+      <h2>Write Your Message</h2>
+      <textarea 
+        [(ngModel)]="customMessage"
+        placeholder="Write your message here... (We'll include your contact details automatically if you're logged in)"
+        style="width: 100%; min-height: 200px; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-family: Arial, sans-serif; font-size: 14px; resize: vertical;"></textarea>
+      
+      <!-- Message Preview -->
+      <div class="message-preview" *ngIf="customMessage" style="background-color: #f5f5f5; border-radius: 4px; padding: 15px; margin-top: 15px; max-height: 300px; overflow-y: auto;">
+        <h3 style="margin-top: 0;">📝 Message Preview:</h3>
+        <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: Arial, sans-serif; color: #333;">{{ getMessagePreview() }}</pre>
+      </div>
+    </div>
+
+    <!-- Send Buttons -->
+    <div class="action-buttons" style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+      <button 
+        (click)="sendMessageToBusinessNumber()"
+        class="btn btn-success"
+        style="flex: 1; min-width: 200px; padding: 15px; font-size: 16px; font-weight: bold;">
+        <i class="fab fa-whatsapp"></i> Send to VSP Electronics
+      </button>
+      
+      <button 
+        *ngIf="isUserLoggedIn"
+        (click)="sendMessageToCustomer()"
+        class="btn btn-info"
+        style="flex: 1; min-width: 200px; padding: 15px; font-size: 16px; font-weight: bold; background-color: #2196F3;">
+        <i class="fab fa-whatsapp"></i> Send to My Number
+      </button>
+    </div>
+
+    <!-- User Orders Section -->
+    <div class="user-orders" *ngIf="isUserLoggedIn && getUserOrders().length > 0" 
+         style="background-color: #e3f2fd; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+      <h3 style="margin-top: 0; color: #1976d2;">📦 Your Recent Orders</h3>
+      <div style="max-height: 200px; overflow-y: auto;">
+        <div *ngFor="let order of getUserOrders()" style="padding: 10px; border-bottom: 1px solid #bbdefb; display: flex; justify-content: space-between;">
+          <div>
+            <strong>{{ order.items }} items</strong> - ₹{{ order.amount }}
+          </div>
+          <div style="font-size: 12px; color: #666;">
+            {{ order.timestamp | date:'short' }}
+          </div>
+        </div>
+      </div>
+      <p style="margin-top: 10px; margin-bottom: 0; font-size: 12px; color: #1976d2;">
+        💡 Use "Order Status" template to check delivery updates
+      </p>
+    </div>
+
+    <!-- Benefits Section -->
+    <div class="benefits">
+      <h2>Why Choose WhatsApp Support?</h2>
+      <div class="benefit-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div class="benefit-item" style="text-align: center;">
+          <i class="fas fa-bolt" style="font-size: 32px; color: #4caf50; margin-bottom: 10px;"></i>
+          <h3>⚡ Instant Response</h3>
+          <p>Get quick answers to your questions within minutes</p>
+        </div>
+        <div class="benefit-item" style="text-align: center;">
+          <i class="fas fa-user-check" style="font-size: 32px; color: #4caf50; margin-bottom: 10px;"></i>
+          <h3>👤 Personalized Service</h3>
+          <p>We recognize you and provide customized responses</p>
+        </div>
+        <div class="benefit-item" style="text-align: center;">
+          <i class="fas fa-images" style="font-size: 32px; color: #4caf50; margin-bottom: 10px;"></i>
+          <h3>📸 Share Images</h3>
+          <p>Send photos of products or issues for better assistance</p>
+        </div>
+        <div class="benefit-item" style="text-align: center;">
+          <i class="fas fa-shield-alt" style="font-size: 32px; color: #4caf50; margin-bottom: 10px;"></i>
+          <h3>🔒 Secure & Private</h3>
+          <p>Your conversations are encrypted and confidential</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Information Section -->
+    <div class="info-box" style="background-color: #f5f5f5; border-left: 4px solid #4caf50; border-radius: 4px; padding: 20px; margin-top: 30px;">
+      <h3 style="margin-top: 0;">ℹ️ How It Works</h3>
+      <ol style="line-height: 1.8;">
+        <li><strong>Choose or Write:</strong> Select a template or write your custom message</li>
+        <li><strong>Preview:</strong> Check the message preview before sending</li>
+        <li><strong>Send:</strong> Click "Send to VSP Electronics" to start chatting</li>
+        <li><strong>Receive:</strong> We'll respond with all the information you need</li>
+        <li><strong>Personalized Service:</strong> If logged in, we'll use your details for better assistance</li>
+      </ol>
+    </div>
+
+    <!-- Contact Note -->
+    <div class="contact-note" style="text-align: center; padding: 20px; background-color: #e8f5e9; border-radius: 4px; margin-top: 30px;">
+      <p style="margin: 0; color: #2e7d32;">
+        <i class="fas fa-info-circle"></i>
+        Your phone number ({{ currentUserPhone || 'from signup' }}) will be shared so we can reach back to you directly.
+      </p>
+    </div>
+  </div>
+</div>

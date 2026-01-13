@@ -1,0 +1,371 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { BackendProductService } from '../../../services/backend-product.service';
+import { environment } from '../../../../environments/environment';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+
+interface Brand {
+  id?: number;
+  name: string;
+  slug?: string;
+  description?: string;
+  image_url?: string;
+  image?: string;
+  logo_url?: string;
+  website?: string;
+  website_url?: string;
+  display_order?: number;
+  is_featured?: boolean;
+  product_count?: number;
+}
+
+@Component({
+  selector: 'app-admin-brands',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DragDropModule],
+  templateUrl: './admin-brands.component.html',
+  styleUrls: ['./admin-brands.component.css']
+})
+export class AdminBrandsComponent implements OnInit {
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private apiUrl = `${environment.apiUrl}`;
+
+  brands: Brand[] = [];
+  showForm = false;
+  editingId: number | null = null;
+  loading = false;
+  error = '';
+  success = '';
+  selectedFile: File | null = null;
+
+  formData: Brand = {
+    name: '',
+    description: '',
+    image_url: '',
+    logo_url: '',
+    website: '',
+    website_url: '',
+    display_order: 0
+  };
+
+  ngOnInit() {
+    this.loadBrands();
+  }
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      return new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
+    }
+    return new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+  }
+
+  goBack() {
+    if (this.selectedBrand) {
+      this.closeBrandProducts();
+    } else {
+      this.router.navigate(['/admin']);
+    }
+  }
+
+  loadBrands() {
+    this.loading = true;
+    this.http.get<any>(`${this.apiUrl}/brands`)
+      .subscribe(
+        (response) => {
+          console.log('Brands API Response:', response);
+          const brandsData = Array.isArray(response) ? response : response.data || response.brands || [];
+          console.log('Brands Data After Mapping:', brandsData);
+          // Map database field names to component field names
+          this.brands = brandsData.map((brand: any) => ({
+            id: brand.id,
+            name: brand.name,
+            slug: brand.slug,
+            description: brand.description,
+            image: brand.image,  // Direct image field
+            logo_url: brand.image,  // Also set logo_url for compatibility
+            website: brand.metadata?.website_url || brand.website,
+            website_url: brand.metadata?.website_url || brand.website,
+            display_order: brand.metadata?.display_order || 0,
+            is_featured: brand.metadata?.is_featured || false,
+            product_count: brand.metadata?.product_count || 0
+          })).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
+          console.log('Final Brands Array:', this.brands);
+          this.loading = false;
+        },
+        (error) => {
+          this.error = 'Failed to load brands';
+          console.error('Error loading brands:', error);
+          this.loading = false;
+        }
+      );
+  }
+
+  openForm(brand?: Brand) {
+    if (brand) {
+      this.editingId = brand.id || null;
+      this.formData = { ...brand };
+    } else {
+      this.editingId = null;
+      this.formData = {
+        name: '',
+        description: '',
+        image_url: '',
+        logo_url: '',
+        website: '',
+        display_order: 0
+      };
+    }
+    this.showForm = true;
+    this.error = '';
+    this.success = '';
+  }
+
+  closeForm() {
+    this.showForm = false;
+    this.selectedFile = null;
+  }
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
+
+  async saveBrand() {
+    if (!this.formData.name) {
+      this.error = 'Brand name is required';
+      return;
+    }
+
+    this.loading = true;
+
+    try {
+      // Upload image if selected
+      if (this.selectedFile) {
+        const imageUrl = await this.uploadImage(this.selectedFile);
+        this.formData.logo_url = imageUrl;
+      }
+
+      // Convert field names to match backend API expectations
+      const payload = {
+        name: this.formData.name,
+        slug: this.formData.slug || this.slugify(this.formData.name),
+        description: this.formData.description,
+        image: this.formData.logo_url,
+        metadata: {
+          website_url: this.formData.website || this.formData.website_url,
+          display_order: this.formData.display_order,
+          is_featured: this.formData.is_featured || false,
+          product_count: this.formData.product_count || 0
+        }
+      };
+
+      const url = this.editingId
+        ? `${this.apiUrl}/brands/${this.editingId}`
+        : `${this.apiUrl}/brands`;
+
+      const method = this.editingId ? 'PUT' : 'POST';
+
+      this.http.request(method, url, {
+        body: payload,
+        headers: this.getAuthHeaders()
+      })
+        .subscribe(
+          (response: any) => {
+            this.success = this.editingId ? 'Brand updated successfully' : 'Brand created successfully';
+            this.loadBrands();
+            this.closeForm();
+            this.loading = false;
+          },
+          (error) => {
+            this.error = error.error?.error || 'Failed to save brand';
+            this.loading = false;
+          }
+        );
+    } catch (err: any) {
+      this.error = err.message || 'Failed to upload image';
+      this.loading = false;
+    }
+  }
+
+  deleteBrand(id?: number) {
+    if (!id || !confirm('Are you sure you want to delete this brand?')) {
+      return;
+    }
+
+    this.loading = true;
+    this.http.delete(`${this.apiUrl}/brands/${id}`, {
+      headers: this.getAuthHeaders()
+    })
+      .subscribe(
+        () => {
+          this.success = 'Brand deleted successfully';
+          this.loadBrands();
+          this.loading = false;
+        },
+        (error) => {
+          this.error = 'Failed to delete brand';
+          this.loading = false;
+        }
+      );
+  }
+
+  private uploadImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const base64Data = reader.result as string;
+          const response = await this.http.post<any>(
+            `${this.apiUrl}/upload/image`,
+            { base64Data: base64Data, type: 'brand' }
+          ).toPromise();
+
+          resolve(response?.imageUrl || base64Data);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Products State
+  products: any[] = [];
+  selectedBrand: Brand | null = null;
+  showProductModal = false;
+  selectedProduct: any | null = null;
+  productForm: any = {};
+
+  // Inject BackendProductService properly
+  private backendService = inject(BackendProductService);
+
+  // ... (previous methods)
+
+  // --- Brand Product View Logic ---
+
+  viewBrandProducts(brand: Brand) {
+    this.selectedBrand = brand;
+    this.loadProducts(brand.name);
+  }
+
+  closeBrandProducts() {
+    this.selectedBrand = null;
+    this.products = [];
+  }
+
+  loadProducts(brandName: string) {
+    this.loading = true;
+    this.backendService.getProducts({ brand: brandName, limit: 1000 }).subscribe({
+      next: (res) => {
+        this.products = res.data || [];
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading products:', err);
+        this.error = 'Failed to load products';
+        this.loading = false;
+      }
+    });
+  }
+
+  // --- Product CRUD (Copied from AdminCategoryDetails for consistency) ---
+
+  openProductModal(product?: any) {
+    if (product) {
+      this.selectedProduct = product;
+      this.productForm = { ...product };
+    } else {
+      this.selectedProduct = null;
+      this.productForm = {
+        name: '',
+        brand: this.selectedBrand?.name || '', // Pre-fill brand
+        price: 0,
+        image: '',
+        description: '',
+        inStock: true,
+        category: '' // Category is required but we don't have strictly one category here. User must select.
+      };
+    }
+    this.showProductModal = true;
+  }
+
+  closeProductModal() {
+    this.showProductModal = false;
+  }
+
+  saveProduct() {
+    if (!this.productForm.name || !this.productForm.price) return;
+
+    const payload: any = { ...this.productForm };
+
+    if (this.selectedProduct) {
+      this.backendService.updateProduct(this.selectedProduct.id, payload).subscribe(() => {
+        if (this.selectedBrand) this.loadProducts(this.selectedBrand.name);
+        this.closeProductModal();
+      });
+    } else {
+      this.backendService.createProduct(payload).subscribe(() => {
+        if (this.selectedBrand) this.loadProducts(this.selectedBrand.name);
+        this.closeProductModal();
+      });
+    }
+  }
+
+  deleteProduct(product: any) {
+    if (confirm('Delete this product?')) {
+      this.backendService.deleteProduct(product.id).subscribe(() => {
+        if (this.selectedBrand) this.loadProducts(this.selectedBrand.name);
+      });
+    }
+  }
+  viewProduct(product: any) {
+    this.router.navigate(['/product', product.id]);
+  }
+
+  onDrop(event: CdkDragDrop<Brand[]>) {
+    moveItemInArray(this.brands, event.previousIndex, event.currentIndex);
+    this.updateDisplayOrder();
+  }
+
+  updateDisplayOrder() {
+    const updates = this.brands.map((brand, index) => {
+      const newOrder = index + 1;
+      // Only update if order changed
+      if (brand.display_order !== newOrder && brand.id) {
+        brand.display_order = newOrder;
+        // The endpoint updateBrand accepts Partial<Brand>
+        // But backend route expects flat fields like { display_order: ... } or { ...updates } which maps to DB.
+        // check categories-model.js updateBrand: it allows display_order via 'displayOrder' case?
+        // categories-api-router.js PUT /admin/brands/:id uses `req.body` and calls `updateBrand`.
+        // categories-model.js updateBrand iterates updates. The key must be 'display_order' or similar. 
+        // No, model expects 'display_order' if key is NOT 'displayOrder'?
+        // Model logic: key === 'displayOrder' ? 'display_order' : key
+        // So passing 'displayOrder' works.
+        return this.http.put(`${this.apiUrl}/categories/admin/brands/${brand.id}`, { displayOrder: newOrder }, { headers: this.getAuthHeaders() }).toPromise();
+      }
+      return Promise.resolve();
+    });
+
+    Promise.all(updates).then(() => {
+      console.log('Brands order updated successfully');
+    }).catch(err => {
+      console.error('Failed to update brand order', err);
+      this.error = 'Failed to update order';
+    });
+  }
+  slugify(text: string): string {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+}

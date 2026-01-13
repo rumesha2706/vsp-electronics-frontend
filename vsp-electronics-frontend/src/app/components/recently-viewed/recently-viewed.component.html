@@ -1,0 +1,40 @@
+<div class="recently-viewed-section">
+  <div class="container">
+    <h2 class="section-title">Recently Viewed Products</h2>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading your recently viewed products...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && recentlyViewedProducts.length === 0" class="empty-state">
+      <i class="fas fa-history"></i>
+      <p>No recently viewed products yet.</p>
+      <p class="text-muted">Products you view will appear here.</p>
+    </div>
+
+    <!-- Products Grid -->
+    <div *ngIf="!loading && recentlyViewedProducts.length > 0" class="content">
+      <div class="products-grid">
+        <app-product-card
+          *ngFor="let product of recentlyViewedProducts"
+          [product]="product">
+        </app-product-card>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" (click)="clearHistory()">
+          Clear History
+        </button>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="error-state">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>{{ error }}</p>
+    </div>
+  </div>
+</div>

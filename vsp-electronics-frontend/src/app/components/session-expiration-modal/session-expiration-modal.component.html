@@ -1,0 +1,60 @@
+<div class="session-expiration-overlay" *ngIf="isOpen">
+  <div class="session-expiration-modal">
+    <!-- Header with gradient background -->
+    <div class="modal-header">
+      <div class="icon-container">
+        <i class="fas fa-clock"></i>
+      </div>
+      <h2>Session Expired</h2>
+      <p class="subtitle">Your session has ended due to inactivity</p>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-content">
+      <!-- Warning Info Box -->
+      <div class="info-box warning">
+        <div class="info-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="info-text">
+          <strong>For security reasons</strong>
+          <p>We automatically log you out after 10 minutes of inactivity to protect your account.</p>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="features-list">
+        <div class="feature-item">
+          <i class="fas fa-shield-alt"></i>
+          <span>Your data is secure</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-lock"></i>
+          <span>Logout was automatic</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-redo"></i>
+          <span>Simply login to continue</span>
+        </div>
+      </div>
+
+      <!-- Countdown Timer -->
+      <div class="countdown-section">
+        <p class="countdown-text">
+          Redirecting to login in <span class="countdown-timer">{{ countdownSeconds }}s</span>
+        </p>
+        <div class="countdown-bar">
+          <div class="countdown-progress" [style.width.%]="(countdownSeconds / 10) * 100"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer with Actions -->
+    <div class="modal-footer">
+      <button class="btn btn-primary" (click)="onLoginClick()">
+        <i class="fas fa-sign-in-alt"></i>
+        Go to Login
+      </button>
+    </div>
+  </div>
+</div>

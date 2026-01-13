@@ -1,0 +1,594 @@
+<div class="user-management">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="goBack()" title="Go back to dashboard">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+      <h1><i class="fas fa-users-cog"></i> User Management</h1>
+      <p>Monitor and manage all registered users</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="openCreateUserModal()">
+        <i class="fas fa-user-plus"></i> Create User
+      </button>
+      <button class="btn btn-success" (click)="openNotificationModal()" 
+              [disabled]="selectedUsers.size === 0">
+        <i class="fas fa-bell"></i> Send Notification ({{ selectedUsers.size }})
+      </button>
+      <button class="btn btn-danger" (click)="openMultiDeleteConfirmModal()" 
+              [disabled]="selectedUsers.size === 0">
+        <i class="fas fa-trash"></i> Delete Selected ({{ selectedUsers.size }})
+      </button>
+      <button class="btn btn-secondary" (click)="exportToCSV()">
+        <i class="fas fa-download"></i> Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-icon blue">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ users.length }}</h3>
+        <p>Total Users</p>
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon green">
+        <i class="fas fa-star"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ getPremiumUsersCount() }}</h3>
+        <p>Premium Users (A+/A)</p>
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon orange">
+        <i class="fas fa-shopping-bag"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ getTotalPurchases() }}</h3>
+        <p>Total Purchases</p>
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon purple">
+        <i class="fas fa-rupee-sign"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ formatCurrency(getTotalRevenue()) }}</h3>
+        <p>Total Revenue</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (input)="onSearch()"
+        placeholder="Search by name, email, or phone...">
+    </div>
+    
+    <div class="filter-controls">
+      <label>Items per page:</label>
+      <select [(ngModel)]="itemsPerPage" (change)="onSearch()">
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="25">25</option>
+        <option [value]="50">50</option>
+        <option [value]="100">100</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="table-container">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th class="checkbox-cell">
+            <input 
+              type="checkbox" 
+              [checked]="selectAll" 
+              (change)="toggleSelectAll()">
+          </th>
+          <th (click)="sortTable('name')" class="sortable">
+            Name 
+            <i class="fas" [class.fa-sort-up]="sortBy === 'name' && sortOrder === 'asc'"
+                           [class.fa-sort-down]="sortBy === 'name' && sortOrder === 'desc'"
+                           [class.fa-sort]="sortBy !== 'name'"></i>
+          </th>
+          <th (click)="sortTable('email')" class="sortable">
+            Email
+            <i class="fas" [class.fa-sort-up]="sortBy === 'email' && sortOrder === 'asc'"
+                           [class.fa-sort-down]="sortBy === 'email' && sortOrder === 'desc'"
+                           [class.fa-sort]="sortBy !== 'email'"></i>
+          </th>
+          <th>Phone</th>
+          <th (click)="sortTable('grade')" class="sortable">
+            Grade
+            <i class="fas" [class.fa-sort-up]="sortBy === 'grade' && sortOrder === 'asc'"
+                           [class.fa-sort-down]="sortBy === 'grade' && sortOrder === 'desc'"
+                           [class.fa-sort]="sortBy !== 'grade'"></i>
+          </th>
+          <th (click)="sortTable('purchases')" class="sortable">
+            Purchases
+            <i class="fas" [class.fa-sort-up]="sortBy === 'purchases' && sortOrder === 'asc'"
+                           [class.fa-sort-down]="sortBy === 'purchases' && sortOrder === 'desc'"
+                           [class.fa-sort]="sortBy !== 'purchases'"></i>
+          </th>
+          <th (click)="sortTable('amount')" class="sortable">
+            Total Amount
+            <i class="fas" [class.fa-sort-up]="sortBy === 'amount' && sortOrder === 'asc'"
+                           [class.fa-sort-down]="sortBy === 'amount' && sortOrder === 'desc'"
+                           [class.fa-sort]="sortBy !== 'amount'"></i>
+          </th>
+          <th (click)="sortTable('activity')" class="sortable">
+            Activity Days
+            <i class="fas" [class.fa-sort-up]="sortBy === 'activity' && sortOrder === 'asc'"
+                           [class.fa-sort-down]="sortBy === 'activity' && sortOrder === 'desc'"
+                           [class.fa-sort]="sortBy !== 'activity'"></i>
+          </th>
+          <th>Last Purchase</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let userAnalytics of getPaginatedUsers()">
+          <td class="checkbox-cell">
+            <input 
+              type="checkbox" 
+              [checked]="isSelected(userAnalytics.user.id)"
+              (change)="toggleUserSelection(userAnalytics.user.id)">
+          </td>
+          <td>
+            <div class="user-info">
+              <div class="user-avatar">
+                {{ (userAnalytics.user.name || userAnalytics.user.firstName || 'U').charAt(0).toUpperCase() }}
+              </div>
+              <span>{{ userAnalytics.user.name || userAnalytics.user.firstName || 'Unknown' }}</span>
+            </div>
+          </td>
+          <td>{{ userAnalytics.user.email }}</td>
+          <td>{{ userAnalytics.user.phone }}</td>
+          <td>
+            <span class="grade-badge" [style.background-color]="userAnalytics.gradeColor">
+              {{ userAnalytics.overallGrade }}
+            </span>
+          </td>
+          <td class="text-center">
+            <span class="badge-count">{{ userAnalytics.totalPurchases }}</span>
+          </td>
+          <td class="text-right">
+            <strong>{{ formatCurrency(userAnalytics.totalAmount) }}</strong>
+          </td>
+          <td class="text-center">
+            <span class="activity-badge">{{ userAnalytics.activityDays }}</span>
+          </td>
+          <td>{{ formatDate(userAnalytics.lastPurchaseDate) }}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon" title="View Details" (click)="viewUserDetails(userAnalytics.user)">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn-icon" title="Send Message" (click)="toggleUserSelection(userAnalytics.user.id); openNotificationModal()">
+                <i class="fas fa-envelope"></i>
+              </button>
+              <button class="btn-icon btn-danger" title="Delete User" (click)="openDeleteConfirmModal(userAnalytics.user)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Mobile Card View -->
+    <div class="mobile-user-cards">
+      <div class="user-card" *ngFor="let userAnalytics of getPaginatedUsers()">
+        <div class="card-header">
+          <div class="checkbox-wrapper">
+            <input 
+              type="checkbox" 
+              [checked]="isSelected(userAnalytics.user.id)"
+              (change)="toggleUserSelection(userAnalytics.user.id)">
+          </div>
+          <div class="user-info-mobile">
+            <div class="user-avatar">
+              {{ (userAnalytics.user.name || userAnalytics.user.firstName || 'U').charAt(0).toUpperCase() }}
+            </div>
+            <div>
+              <div class="user-name">{{ userAnalytics.user.name || userAnalytics.user.firstName || 'Unknown' }}</div>
+              <span class="grade-badge" [style.background-color]="userAnalytics.gradeColor">
+                {{ userAnalytics.overallGrade }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-row">
+            <span class="label">Email:</span>
+            <span class="value">{{ userAnalytics.user.email }}</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Phone:</span>
+            <span class="value">{{ userAnalytics.user.phone }}</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Purchases:</span>
+            <span class="badge-count">{{ userAnalytics.totalPurchases }}</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Revenue:</span>
+            <span class="value">{{ formatCurrency(userAnalytics.totalAmount) }}</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Activity:</span>
+            <span class="activity-badge">{{ userAnalytics.activityDays }} days</span>
+          </div>
+          <div class="card-row">
+            <span class="label">Last Purchase:</span>
+            <span class="value">{{ formatDate(userAnalytics.lastPurchaseDate) }}</span>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn-action" title="View Details" (click)="viewUserDetails(userAnalytics.user)">
+            <i class="fas fa-eye"></i> View
+          </button>
+          <button class="btn-action" title="Send Message" (click)="toggleUserSelection(userAnalytics.user.id); openNotificationModal()">
+            <i class="fas fa-envelope"></i> Message
+          </button>
+          <button class="btn-action btn-danger" title="Delete User" (click)="openDeleteConfirmModal(userAnalytics.user)">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results -->
+    <div class="no-results" *ngIf="filteredUsers.length === 0">
+      <i class="fas fa-user-slash"></i>
+      <h3>No users found</h3>
+      <p>Try adjusting your search criteria</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button 
+      class="page-btn" 
+      (click)="changePage(1)" 
+      [disabled]="currentPage === 1">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
+    <button 
+      class="page-btn" 
+      (click)="changePage(currentPage - 1)" 
+      [disabled]="currentPage === 1">
+      <i class="fas fa-angle-left"></i>
+    </button>
+    
+    <button 
+      *ngFor="let page of getPageNumbers()" 
+      class="page-btn"
+      [class.active]="page === currentPage"
+      (click)="changePage(page)">
+      {{ page }}
+    </button>
+    
+    <button 
+      class="page-btn" 
+      (click)="changePage(currentPage + 1)" 
+      [disabled]="currentPage === totalPages">
+      <i class="fas fa-angle-right"></i>
+    </button>
+    <button 
+      class="page-btn" 
+      (click)="changePage(totalPages)" 
+      [disabled]="currentPage === totalPages">
+      <i class="fas fa-angle-double-right"></i>
+    </button>
+    
+    <span class="page-info">
+      Page {{ currentPage }} of {{ totalPages }} | Total: {{ filteredUsers.length }} users
+    </span>
+  </div>
+</div>
+
+<!-- Push Notification Modal -->
+<div class="modal-backdrop" *ngIf="showNotificationModal" (click)="closeNotificationModal()">
+  <div class="modal-content notification-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-bell"></i> Send Push Notification</h2>
+      <button class="close-btn" (click)="closeNotificationModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="notification-info">
+        <i class="fas fa-info-circle"></i>
+        <span>Sending to <strong>{{ selectedUsers.size }}</strong> selected user(s)</span>
+      </div>
+      
+      <div class="form-group">
+        <label for="notif-title">Notification Title *</label>
+        <input 
+          type="text" 
+          id="notif-title"
+          [(ngModel)]="notificationTitle"
+          placeholder="Enter notification title"
+          maxlength="100">
+      </div>
+      
+      <div class="form-group">
+        <label for="notif-message">Message *</label>
+        <textarea 
+          id="notif-message"
+          [(ngModel)]="notificationMessage"
+          placeholder="Enter your message..."
+          rows="5"
+          maxlength="500"></textarea>
+        <small>{{ notificationMessage.length }}/500 characters</small>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeNotificationModal()">
+        Cancel
+      </button>
+      <button class="btn btn-primary" (click)="sendNotification()">
+        <i class="fas fa-paper-plane"></i> Send Notification
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Result Modal -->
+<div class="modal-backdrop" *ngIf="showDeleteResultModal" (click)="closeDeleteResultModal()">
+  <div class="modal-content result-modal" [ngClass]="'result-' + deleteResultType" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="result-header">
+        <div *ngIf="deleteResultType === 'success'" class="result-icon success">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div *ngIf="deleteResultType === 'error'" class="result-icon error">
+          <i class="fas fa-times-circle"></i>
+        </div>
+        <div *ngIf="deleteResultType === 'mixed'" class="result-icon mixed">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <h2>{{ deleteResultType === 'success' ? 'Success' : deleteResultType === 'error' ? 'Error' : 'Partial Success' }}</h2>
+      </div>
+      <button class="close-btn" (click)="closeDeleteResultModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <p class="result-message">{{ deleteResultMessage }}</p>
+      
+      <div *ngIf="deleteResultType !== 'success'" class="result-details">
+        <div class="detail-row" *ngIf="deleteResultDetails.successCount > 0">
+          <span class="detail-label">
+            <i class="fas fa-check"></i> Deleted:
+          </span>
+          <span class="detail-value success-text">{{ deleteResultDetails.successCount }} user(s)</span>
+        </div>
+        <div class="detail-row" *ngIf="deleteResultDetails.failCount > 0">
+          <span class="detail-label">
+            <i class="fas fa-times"></i> Failed:
+          </span>
+          <span class="detail-value error-text">{{ deleteResultDetails.failCount }} user(s)</span>
+        </div>
+      </div>
+
+      <div *ngIf="deleteResultType === 'success'" class="result-details">
+        <div class="detail-row">
+          <span class="detail-label">
+            <i class="fas fa-check"></i> Total Deleted:
+          </span>
+          <span class="detail-value success-text">{{ deleteResultDetails.successCount }} user(s)</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-primary" (click)="closeDeleteResultModal()">
+        <i class="fas fa-check"></i> Done
+      </button>
+    </div>
+  </div>
+</div>
+<!-- Delete Confirmation Modal -->
+<div class="modal-backdrop" *ngIf="showDeleteConfirmModal" (click)="closeDeleteConfirmModal()">
+  <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 *ngIf="!isMultiDelete">
+        <i class="fas fa-exclamation-triangle"></i> Confirm Delete User
+      </h2>
+      <h2 *ngIf="isMultiDelete">
+        <i class="fas fa-exclamation-triangle"></i> Confirm Delete Multiple Users
+      </h2>
+      <button class="close-btn" (click)="closeDeleteConfirmModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- Single Delete -->
+      <div *ngIf="!isMultiDelete" class="delete-warning">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>Are you sure you want to delete <strong>{{ userToDelete?.name }}</strong>?</p>
+        <p class="warning-text">This action cannot be undone. All user data and associated records will be permanently removed.</p>
+        
+        <div class="user-delete-info">
+          <div class="info-row">
+            <span class="label">Name:</span>
+            <span class="value">{{ userToDelete?.name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Email:</span>
+            <span class="value">{{ userToDelete?.email }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Phone:</span>
+            <span class="value">{{ userToDelete?.phone }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Multi Delete -->
+      <div *ngIf="isMultiDelete" class="delete-warning">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>Are you sure you want to delete <strong>{{ usersToDelete.length }} user(s)</strong>?</p>
+        <p class="warning-text">This action cannot be undone. All user data and associated records will be permanently removed.</p>
+        
+        <div class="user-delete-info multi-user-list">
+          <div class="list-header">
+            <strong>Users to be deleted:</strong>
+          </div>
+          <div class="info-row user-item" *ngFor="let user of usersToDelete">
+            <span class="user-avatar">{{ (user.name || user.firstName || 'U').charAt(0).toUpperCase() }}</span>
+            <div class="user-details">
+              <span class="user-name">{{ user.name || user.firstName || 'Unknown' }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteConfirmModal()">
+        Cancel
+      </button>
+      <button class="btn btn-danger" (click)="confirmDeleteUser()">
+        <i class="fas fa-trash"></i> {{ isMultiDelete ? 'Delete All' : 'Delete User' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal-backdrop" *ngIf="showCreateUserModal" (click)="closeCreateUserModal()">
+  <div class="modal-content create-user-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-user-plus"></i> Create New User</h2>
+      <button class="close-btn" (click)="closeCreateUserModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body" *ngIf="!createUserSuccess">
+      <form class="user-form" (ngSubmit)="createNewUser()">
+        <!-- Name Field -->
+        <div class="form-group">
+          <label for="user-name">Full Name *</label>
+          <input 
+            type="text" 
+            id="user-name"
+            [(ngModel)]="newUserForm.name"
+            name="name"
+            placeholder="Enter full name"
+            class="form-control"
+            [class.is-invalid]="createUserErrors['name']">
+          <span class="error-message" *ngIf="createUserErrors['name']">
+            {{ createUserErrors['name'] }}
+          </span>
+        </div>
+
+        <!-- Email Field -->
+        <div class="form-group">
+          <label for="user-email">Email *</label>
+          <input 
+            type="email" 
+            id="user-email"
+            [(ngModel)]="newUserForm.email"
+            name="email"
+            placeholder="Enter email address"
+            class="form-control"
+            [class.is-invalid]="createUserErrors['email']">
+          <span class="error-message" *ngIf="createUserErrors['email']">
+            {{ createUserErrors['email'] }}
+          </span>
+        </div>
+
+        <!-- Phone Field -->
+        <div class="form-group">
+          <label for="user-phone">Phone Number *</label>
+          <input 
+            type="tel" 
+            id="user-phone"
+            [(ngModel)]="newUserForm.phone"
+            name="phone"
+            placeholder="Enter 10-digit phone number"
+            class="form-control"
+            maxlength="10"
+            [class.is-invalid]="createUserErrors['phone']">
+          <span class="error-message" *ngIf="createUserErrors['phone']">
+            {{ createUserErrors['phone'] }}
+          </span>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="user-password">Password *</label>
+          <input 
+            type="password" 
+            id="user-password"
+            [(ngModel)]="newUserForm.password"
+            name="password"
+            placeholder="Enter password (min 6 characters)"
+            class="form-control"
+            [class.is-invalid]="createUserErrors['password']">
+          <span class="error-message" *ngIf="createUserErrors['password']">
+            {{ createUserErrors['password'] }}
+          </span>
+        </div>
+
+        <!-- Role Field -->
+        <div class="form-group">
+          <label for="user-role">User Role *</label>
+          <select 
+            id="user-role"
+            [(ngModel)]="newUserForm.role"
+            name="role"
+            class="form-control">
+            <option value="user">Regular User</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+      </form>
+    </div>
+
+    <!-- Success Message -->
+    <div class="modal-body" *ngIf="createUserSuccess">
+      <div class="success-message">
+        <i class="fas fa-check-circle"></i>
+        <h3>User Created Successfully!</h3>
+        <p>The new user has been added to the system.</p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeCreateUserModal()" *ngIf="!createUserSuccess">
+        Cancel
+      </button>
+      <button class="btn btn-primary" (click)="createNewUser()" *ngIf="!createUserSuccess">
+        <i class="fas fa-save"></i> Create User
+      </button>
+      <button class="btn btn-primary" (click)="closeCreateUserModal()" *ngIf="createUserSuccess">
+        <i class="fas fa-check"></i> Done
+      </button>
+    </div>
+  </div>
+</div>

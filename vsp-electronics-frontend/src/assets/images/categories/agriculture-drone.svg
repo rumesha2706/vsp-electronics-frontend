@@ -1,0 +1,35 @@
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="300" fill="#f5f3ef"/>
+  <g transform="translate(150, 150)">
+    <!-- Large drone body -->
+    <rect x="-35" y="-15" width="70" height="30" fill="#333" rx="5"/>
+    <!-- Tank/Sprayer -->
+    <rect x="-25" y="-8" width="50" height="16" fill="#4caf50" rx="3"/>
+    <!-- Arms -->
+    <line x1="-35" y1="0" x2="-70" y2="-35" stroke="#0066cc" stroke-width="5"/>
+    <line x1="35" y1="0" x2="70" y2="-35" stroke="#0066cc" stroke-width="5"/>
+    <line x1="-35" y1="0" x2="-70" y2="35" stroke="#0066cc" stroke-width="5"/>
+    <line x1="35" y1="0" x2="70" y2="35" stroke="#0066cc" stroke-width="5"/>
+    <!-- Large motors -->
+    <circle cx="-70" cy="-35" r="15" fill="#333"/>
+    <circle cx="70" cy="-35" r="15" fill="#333"/>
+    <circle cx="-70" cy="35" r="15" fill="#333"/>
+    <circle cx="70" cy="35" r="15" fill="#333"/>
+    <!-- Large propellers -->
+    <ellipse cx="-70" cy="-35" rx="28" ry="7" fill="#666" opacity="0.4"/>
+    <ellipse cx="70" cy="-35" rx="28" ry="7" fill="#666" opacity="0.4"/>
+    <ellipse cx="-70" cy="35" rx="28" ry="7" fill="#666" opacity="0.4"/>
+    <ellipse cx="70" cy="35" rx="28" ry="7" fill="#666" opacity="0.4"/>
+    <!-- Spray nozzles -->
+    <circle cx="-15" cy="18" r="3" fill="#0066cc"/>
+    <circle cx="0" cy="18" r="3" fill="#0066cc"/>
+    <circle cx="15" cy="18" r="3" fill="#0066cc"/>
+    <!-- Spray droplets -->
+    <circle cx="-15" cy="28" r="2" fill="#0066cc" opacity="0.5"/>
+    <circle cx="-10" cy="32" r="2" fill="#0066cc" opacity="0.5"/>
+    <circle cx="0" cy="30" r="2" fill="#0066cc" opacity="0.5"/>
+    <circle cx="10" cy="32" r="2" fill="#0066cc" opacity="0.5"/>
+    <circle cx="15" cy="28" r="2" fill="#0066cc" opacity="0.5"/>
+  </g>
+  <text x="150" y="265" font-family="Arial, sans-serif" font-size="15" fill="#0066cc" text-anchor="middle" font-weight="bold">Agriculture Drone Parts</text>
+</svg>

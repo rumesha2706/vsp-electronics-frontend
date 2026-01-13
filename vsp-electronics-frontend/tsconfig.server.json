@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/server",
+    "target": "es2020",
+    "types": [
+      "node"
+    ],
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "module": "commonjs"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "src/main.ts"
+  ],
+  "angularCompilerOptions": {
+    "enableResourceInlining": true
+  }
+}
